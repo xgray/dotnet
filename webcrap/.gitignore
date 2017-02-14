@@ -43,5 +43,6 @@ project.lock.json
 # dotCover
 *.dotCover
 
-# BenchmarkDotNet
-BDN.Generated
+# samples
+samples
+
