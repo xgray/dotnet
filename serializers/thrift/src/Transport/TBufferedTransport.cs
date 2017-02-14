@@ -25,8 +25,8 @@ namespace Thrift.Transport
     public class TBufferedTransport : TTransport, IDisposable
     {
         private readonly int bufSize;
-        private readonly MemoryStream inputBuffer = new MemoryStream(0);
-        private readonly MemoryStream outputBuffer = new MemoryStream(0);
+        private readonly TByteBuffer inputBuffer = new TByteBuffer(1024);
+        private readonly TByteBuffer outputBuffer = new TByteBuffer(1024);
         private readonly TTransport transport;
 
         public TBufferedTransport(TTransport transport, int bufSize = 1024)

@@ -24,8 +24,8 @@ namespace Thrift.Transport
     public class TFramedTransport : TTransport, IDisposable
     {
         private readonly TTransport transport;
-        private readonly MemoryStream writeBuffer = new MemoryStream(1024);
-        private readonly MemoryStream readBuffer = new MemoryStream(1024);
+        private readonly TByteBuffer writeBuffer = new TByteBuffer(1024);
+        private readonly TByteBuffer readBuffer = new TByteBuffer(1024);
 
         private const int HeaderSize = 4;
         private readonly byte[] headerBuf = new byte[HeaderSize];
