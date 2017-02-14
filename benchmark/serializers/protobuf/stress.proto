@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "protobuf";
+
+package protobuf;
+
+message Simple {
+  string value = 1;
+  int32 shortValue = 2;
+  int32 intValue = 3;
+  int64 longValue = 4;
+};
+
+message Complex {
+  Simple simpleValue = 1;
+  repeated Simple listValue = 2;
+};
