@@ -137,7 +137,18 @@ namespace Bench
         {
             return type.GetTypeInfo().GetRuntimeInterfaceMap(iType);
         }
+
+        public static ConstructorInfo GetConstructor(this Type type, params Type[] types)
+        {
+            return TypeExtensions.GetConstructor(type, types);
+        }
         
+#else
+        public static ConstructorInfo GetConstructor(this Type type, params Type[] types)
+        {
+            return type.GetConstructor(types);
+        }
+
 #endif
 
         public static bool HasCustomAttribute(this Type type, Type attributeType, bool inherit = false)
@@ -173,11 +184,6 @@ namespace Bench
         public static T[] GetCustomAttributes<T>(this MemberInfo memberInfo, bool inherit = false) where T : Attribute
         {
             return (T[])memberInfo.GetCustomAttributes(typeof(T), inherit);
-        }
-
-        public static ConstructorInfo GetConstructor(this Type type, params Type[] types)
-        {
-            return TypeExtensions.GetConstructor(type, types);
         }
 
         public static MethodInfo GetInterfaceMethod(this Type type, MethodInfo iMethod)

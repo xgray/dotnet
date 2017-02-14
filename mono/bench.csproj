@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\Bond.CSharp.5.1.0\build\Bond.CSharp.props" Condition="Exists('packages\Bond.CSharp.5.1.0\build\Bond.CSharp.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E7D3AB38-D5B1-4467-84AF-D960E9AD9890}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>mono</RootNamespace>
+    <AssemblyName>bench</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml.Serialization" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>packages\System.Collections.Immutable.1.1.37\lib\dotnet\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reflection.Metadata">
+      <HintPath>packages\System.Reflection.Metadata.1.2.0\lib\portable-net45+win8\System.Reflection.Metadata.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis">
+      <HintPath>packages\Microsoft.CodeAnalysis.Common.1.3.2\lib\net45\Microsoft.CodeAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>packages\Microsoft.CodeAnalysis.CSharp.1.3.2\lib\net45\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions">
+      <HintPath>packages\System.Threading.Tasks.Extensions.4.0.0\lib\portable-net45+win8+wp8+wpa81\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="BenchmarkDotNet.Core">
+      <HintPath>packages\BenchmarkDotNet.Core.0.10.1\lib\net45\BenchmarkDotNet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Management" />
+    <Reference Include="BenchmarkDotNet.Toolchains.Roslyn">
+      <HintPath>packages\BenchmarkDotNet.Toolchains.Roslyn.0.10.1\lib\net45\BenchmarkDotNet.Toolchains.Roslyn.dll</HintPath>
+    </Reference>
+    <Reference Include="BenchmarkDotNet">
+      <HintPath>packages\BenchmarkDotNet.0.10.1\lib\net45\BenchmarkDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Diagnostics.Tracing.TraceEvent">
+      <HintPath>packages\Microsoft.Diagnostics.Tracing.TraceEvent.1.0.41\lib\net40\Microsoft.Diagnostics.Tracing.TraceEvent.dll</HintPath>
+    </Reference>
+    <Reference Include="BenchmarkDotNet.Diagnostics.Windows">
+      <HintPath>packages\BenchmarkDotNet.Diagnostics.Windows.0.10.1\lib\net45\BenchmarkDotNet.Diagnostics.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="Thrift">
+      <HintPath>packages\ApacheThrift.0.9.3\lib\Thrift.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="Bond.Attributes">
+      <HintPath>packages\Bond.Core.CSharp.5.1.0\lib\net45\Bond.Attributes.dll</HintPath>
+    </Reference>
+    <Reference Include="Bond">
+      <HintPath>packages\Bond.Core.CSharp.5.1.0\lib\net45\Bond.dll</HintPath>
+    </Reference>
+    <Reference Include="Bond.IO">
+      <HintPath>packages\Bond.Core.CSharp.5.1.0\lib\net45\Bond.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="Bond.Reflection">
+      <HintPath>packages\Bond.Core.CSharp.5.1.0\lib\net45\Bond.Reflection.dll</HintPath>
+    </Reference>
+    <Reference Include="Bond.JSON">
+      <HintPath>packages\Bond.Runtime.CSharp.5.1.0\lib\net45\Bond.JSON.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>packages\Google.Protobuf.3.2.0\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\serializers\prototuple\src\ArrayColumn.cs">
+      <Link>src\serializers\prototuple\src\ArrayColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\BooleanColumn.cs">
+      <Link>src\serializers\prototuple\src\BooleanColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ByteColumn.cs">
+      <Link>src\serializers\prototuple\src\ByteColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\DateTimeColumn.cs">
+      <Link>src\serializers\prototuple\src\DateTimeColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\DoubleColumn.cs">
+      <Link>src\serializers\prototuple\src\DoubleColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\GuidColumn.cs">
+      <Link>src\serializers\prototuple\src\GuidColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\IPartitionProto.cs">
+      <Link>src\serializers\prototuple\src\IPartitionProto.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\IProtoColumn.cs">
+      <Link>src\serializers\prototuple\src\IProtoColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ImageColumn.cs">
+      <Link>src\serializers\prototuple\src\ImageColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\Int16Column.cs">
+      <Link>src\serializers\prototuple\src\Int16Column.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\Int32Column.cs">
+      <Link>src\serializers\prototuple\src\Int32Column.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\Int64Column.cs">
+      <Link>src\serializers\prototuple\src\Int64Column.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ListColumn.cs">
+      <Link>src\serializers\prototuple\src\ListColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\MapColumn.cs">
+      <Link>src\serializers\prototuple\src\MapColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\Proto.cs">
+      <Link>src\serializers\prototuple\src\Proto.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ProtoAttribute.cs">
+      <Link>src\serializers\prototuple\src\ProtoAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ProtoColumn.cs">
+      <Link>src\serializers\prototuple\src\ProtoColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ProtoColumnAttribute.cs">
+      <Link>src\serializers\prototuple\src\ProtoColumnAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ProtoExceptions.cs">
+      <Link>src\serializers\prototuple\src\ProtoExceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ProtoSchema.cs">
+      <Link>src\serializers\prototuple\src\ProtoSchema.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ProtoTypeColumn.cs">
+      <Link>src\serializers\prototuple\src\ProtoTypeColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\ProtoUtils.cs">
+      <Link>src\serializers\prototuple\src\ProtoUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\SetColumn.cs">
+      <Link>src\serializers\prototuple\src\SetColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\StringColumn.cs">
+      <Link>src\serializers\prototuple\src\StringColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\UInt16Column.cs">
+      <Link>src\serializers\prototuple\src\UInt16Column.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\UInt32Column.cs">
+      <Link>src\serializers\prototuple\src\UInt32Column.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\prototuple\src\UInt64Column.cs">
+      <Link>src\serializers\prototuple\src\UInt64Column.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ByteOrder.cs">
+      <Link>src\serializers\sbe\src\ByteOrder.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\DirectBuffer.cs">
+      <Link>src\serializers\sbe\src\DirectBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\EndianessConverter.cs">
+      <Link>src\serializers\sbe\src\EndianessConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\PrimitiveType.cs">
+      <Link>src\serializers\sbe\src\PrimitiveType.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\PrimitiveValue.cs">
+      <Link>src\serializers\sbe\src\PrimitiveValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\Representation.cs">
+      <Link>src\serializers\sbe\src\Representation.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\SbePrimitiveType.cs">
+      <Link>src\serializers\sbe\src\SbePrimitiveType.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\Otf\AbstractTokenListener.cs">
+      <Link>src\serializers\sbe\src\Otf\AbstractTokenListener.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\Otf\ITokenListener.cs">
+      <Link>src\serializers\sbe\src\Otf\ITokenListener.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\Otf\OtfHeaderDecoder.cs">
+      <Link>src\serializers\sbe\src\Otf\OtfHeaderDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\Otf\OtfMessageDecoder.cs">
+      <Link>src\serializers\sbe\src\Otf\OtfMessageDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\Otf\Util.cs">
+      <Link>src\serializers\sbe\src\Otf\Util.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\Util\Verify.cs">
+      <Link>src\serializers\sbe\src\Util\Verify.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\Encoding.cs">
+      <Link>src\serializers\sbe\src\ir\Encoding.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\HeaderStructure.cs">
+      <Link>src\serializers\sbe\src\ir\HeaderStructure.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\IntermediateRepresentation.cs">
+      <Link>src\serializers\sbe\src\ir\IntermediateRepresentation.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\IrDecoder.cs">
+      <Link>src\serializers\sbe\src\ir\IrDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\IrUtil.cs">
+      <Link>src\serializers\sbe\src\ir\IrUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\Presence.cs">
+      <Link>src\serializers\sbe\src\ir\Presence.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\Signal.cs">
+      <Link>src\serializers\sbe\src\ir\Signal.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\Token.cs">
+      <Link>src\serializers\sbe\src\ir\Token.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\VersionContext.cs">
+      <Link>src\serializers\sbe\src\ir\VersionContext.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\ByteOrderCodec.cs">
+      <Link>src\serializers\sbe\src\ir\generated\ByteOrderCodec.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\FrameCodec.cs">
+      <Link>src\serializers\sbe\src\ir\generated\FrameCodec.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\MessageHeader.cs">
+      <Link>src\serializers\sbe\src\ir\generated\MessageHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\MetaAttribute.cs">
+      <Link>src\serializers\sbe\src\ir\generated\MetaAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\PresenceCodec.cs">
+      <Link>src\serializers\sbe\src\ir\generated\PresenceCodec.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\PrimitiveTypeCodec.cs">
+      <Link>src\serializers\sbe\src\ir\generated\PrimitiveTypeCodec.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\SignalCodec.cs">
+      <Link>src\serializers\sbe\src\ir\generated\SignalCodec.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\TokenCodec.cs">
+      <Link>src\serializers\sbe\src\ir\generated\TokenCodec.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\sbe\src\ir\generated\VarDataEncoding.cs">
+      <Link>src\serializers\sbe\src\ir\generated\VarDataEncoding.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\TApplicationException.cs">
+      <Link>src\serializers\thrift\src\TApplicationException.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\TException.cs">
+      <Link>src\serializers\thrift\src\TException.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Collections\TCollections.cs">
+      <Link>src\serializers\thrift\src\Collections\TCollections.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Collections\THashSet.cs">
+      <Link>src\serializers\thrift\src\Collections\THashSet.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TAbstractBase.cs">
+      <Link>src\serializers\thrift\src\Protocol\TAbstractBase.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TBase.cs">
+      <Link>src\serializers\thrift\src\Protocol\TBase.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TBase64Utils.cs">
+      <Link>src\serializers\thrift\src\Protocol\TBase64Utils.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TBinaryProtocol.cs">
+      <Link>src\serializers\thrift\src\Protocol\TBinaryProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TCompactProtocol.cs">
+      <Link>src\serializers\thrift\src\Protocol\TCompactProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TField.cs">
+      <Link>src\serializers\thrift\src\Protocol\TField.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TJSONProtocol.cs">
+      <Link>src\serializers\thrift\src\Protocol\TJSONProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TList.cs">
+      <Link>src\serializers\thrift\src\Protocol\TList.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TMap.cs">
+      <Link>src\serializers\thrift\src\Protocol\TMap.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TMessage.cs">
+      <Link>src\serializers\thrift\src\Protocol\TMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TMessageType.cs">
+      <Link>src\serializers\thrift\src\Protocol\TMessageType.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TMultiplexedProtocol.cs">
+      <Link>src\serializers\thrift\src\Protocol\TMultiplexedProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TProtocol.cs">
+      <Link>src\serializers\thrift\src\Protocol\TProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TProtocolDecorator.cs">
+      <Link>src\serializers\thrift\src\Protocol\TProtocolDecorator.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TProtocolException.cs">
+      <Link>src\serializers\thrift\src\Protocol\TProtocolException.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TProtocolFactory.cs">
+      <Link>src\serializers\thrift\src\Protocol\TProtocolFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TProtocolUtil.cs">
+      <Link>src\serializers\thrift\src\Protocol\TProtocolUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TSet.cs">
+      <Link>src\serializers\thrift\src\Protocol\TSet.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TStruct.cs">
+      <Link>src\serializers\thrift\src\Protocol\TStruct.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Protocol\TType.cs">
+      <Link>src\serializers\thrift\src\Protocol\TType.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TBufferedTransport.cs">
+      <Link>src\serializers\thrift\src\Transport\TBufferedTransport.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TByteBuffer.cs">
+      <Link>src\serializers\thrift\src\Transport\TByteBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TFramedTransport.cs">
+      <Link>src\serializers\thrift\src\Transport\TFramedTransport.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TMemoryBuffer.cs">
+      <Link>src\serializers\thrift\src\Transport\TMemoryBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TServerTransport.cs">
+      <Link>src\serializers\thrift\src\Transport\TServerTransport.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TStreamTransport.cs">
+      <Link>src\serializers\thrift\src\Transport\TStreamTransport.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TTransport.cs">
+      <Link>src\serializers\thrift\src\Transport\TTransport.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TTransportException.cs">
+      <Link>src\serializers\thrift\src\Transport\TTransportException.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thrift\src\Transport\TTransportFactory.cs">
+      <Link>src\serializers\thrift\src\Transport\TTransportFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\ArrayValue.cs">
+      <Link>src\serializers\thriftnet\src\ArrayValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\BinaryValue.cs">
+      <Link>src\serializers\thriftnet\src\BinaryValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\BooleanValue.cs">
+      <Link>src\serializers\thriftnet\src\BooleanValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\ByteValue.cs">
+      <Link>src\serializers\thriftnet\src\ByteValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\DateTimeValue.cs">
+      <Link>src\serializers\thriftnet\src\DateTimeValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\DoubleValue.cs">
+      <Link>src\serializers\thriftnet\src\DoubleValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\GuidValue.cs">
+      <Link>src\serializers\thriftnet\src\GuidValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\Int16Value.cs">
+      <Link>src\serializers\thriftnet\src\Int16Value.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\Int32Value.cs">
+      <Link>src\serializers\thriftnet\src\Int32Value.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\Int64Value.cs">
+      <Link>src\serializers\thriftnet\src\Int64Value.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\ListValue.cs">
+      <Link>src\serializers\thriftnet\src\ListValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\MapValue.cs">
+      <Link>src\serializers\thriftnet\src\MapValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\Proto.cs">
+      <Link>src\serializers\thriftnet\src\Proto.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\ProtoAttribute.cs">
+      <Link>src\serializers\thriftnet\src\ProtoAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\ProtoColumn.cs">
+      <Link>src\serializers\thriftnet\src\ProtoColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\ProtoColumnAttribute.cs">
+      <Link>src\serializers\thriftnet\src\ProtoColumnAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\ProtoExceptions.cs">
+      <Link>src\serializers\thriftnet\src\ProtoExceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\SetValue.cs">
+      <Link>src\serializers\thriftnet\src\SetValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\StringValue.cs">
+      <Link>src\serializers\thriftnet\src\StringValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\StructValue.cs">
+      <Link>src\serializers\thriftnet\src\StructValue.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\UInt16Value.cs">
+      <Link>src\serializers\thriftnet\src\UInt16Value.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\UInt32Value.cs">
+      <Link>src\serializers\thriftnet\src\UInt32Value.cs</Link>
+    </Compile>
+    <Compile Include="..\serializers\thriftnet\src\UInt64Value.cs">
+      <Link>src\serializers\thriftnet\src\UInt64Value.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\Array.cs">
+      <Link>src\utils\Array.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\CommandLine.cs">
+      <Link>src\utils\CommandLine.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\CommonUtils.cs">
+      <Link>src\utils\CommonUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\IXmlDeserializeCallback.cs">
+      <Link>src\utils\IXmlDeserializeCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\Library.cs">
+      <Link>src\utils\Library.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\TapAwaiter.cs">
+      <Link>src\utils\TapAwaiter.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\TypeUtils.cs">
+      <Link>src\utils\TypeUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\WorkingContext.cs">
+      <Link>src\utils\WorkingContext.cs</Link>
+    </Compile>
+    <Compile Include="..\utils\XmlSerializerComponent.cs">
+      <Link>src\utils\XmlSerializerComponent.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\Bench.cs">
+      <Link>src\benchmark\Bench.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\BenchTest.cs">
+      <Link>src\benchmark\BenchTest.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\binarytrees.cs">
+      <Link>src\benchmark\debian\binarytrees.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\fasta.cs">
+      <Link>src\benchmark\debian\fasta.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\mandelbrot.cs">
+      <Link>src\benchmark\debian\mandelbrot.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\math.cs">
+      <Link>src\benchmark\debian\math.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\nbody.cs">
+      <Link>src\benchmark\debian\nbody.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\pidigits.cs">
+      <Link>src\benchmark\debian\pidigits.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\regexdna.cs">
+      <Link>src\benchmark\debian\regexdna.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\debian\spectralnorm.cs">
+      <Link>src\benchmark\debian\spectralnorm.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Algorithms\Algo_BitCount.cs">
+      <Link>src\benchmark\samples\Algorithms\Algo_BitCount.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Algorithms\Algo_Md5VsSha256.cs">
+      <Link>src\benchmark\samples\Algorithms\Algo_Md5VsSha256.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Algorithms\Algo_MostSignificantBit.cs">
+      <Link>src\benchmark\samples\Algorithms\Algo_MostSignificantBit.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\CPU\Cpu_Atomics.cs">
+      <Link>src\benchmark\samples\CPU\Cpu_Atomics.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\CPU\Cpu_BranchPerdictor.cs">
+      <Link>src\benchmark\samples\CPU\Cpu_BranchPerdictor.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\CPU\Cpu_Ilp_Inc.cs">
+      <Link>src\benchmark\samples\CPU\Cpu_Ilp_Inc.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\CPU\Cpu_Ilp_Max.cs">
+      <Link>src\benchmark\samples\CPU\Cpu_Ilp_Max.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\CPU\Cpu_Ilp_VsBce.cs">
+      <Link>src\benchmark\samples\CPU\Cpu_Ilp_VsBce.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\CPU\Cpu_MatrixMultiplication.cs">
+      <Link>src\benchmark\samples\CPU\Cpu_MatrixMultiplication.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_DateTime.cs">
+      <Link>src\benchmark\samples\Framework\Framework_DateTime.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_DictionaryVsIDictionary.cs">
+      <Link>src\benchmark\samples\Framework\Framework_DictionaryVsIDictionary.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_Interpolated_vs_ToString.cs">
+      <Link>src\benchmark\samples\Framework\Framework_Interpolated_vs_ToString.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_IterativeVsLINQ.cs">
+      <Link>src\benchmark\samples\Framework\Framework_IterativeVsLINQ.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_SelectVsConvertAll.cs">
+      <Link>src\benchmark\samples\Framework\Framework_SelectVsConvertAll.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_StackFrameVsStackTrace.cs">
+      <Link>src\benchmark\samples\Framework\Framework_StackFrameVsStackTrace.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_Stopwatch.cs">
+      <Link>src\benchmark\samples\Framework\Framework_Stopwatch.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Framework\Framework_StringConcatVsStringBuilder.cs">
+      <Link>src\benchmark\samples\Framework\Framework_StringConcatVsStringBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\IL\IL_Loops.cs">
+      <Link>src\benchmark\samples\IL\IL_Loops.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\IL\Il_ReadonlyFields.cs">
+      <Link>src\benchmark\samples\IL\Il_ReadonlyFields.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\IL\Il_Switch.cs">
+      <Link>src\benchmark\samples\IL\Il_Switch.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroAdvancedStats.cs">
+      <Link>src\benchmark\samples\Intro\IntroAdvancedStats.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroBaseline.cs">
+      <Link>src\benchmark\samples\Intro\IntroBaseline.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroBasic.cs">
+      <Link>src\benchmark\samples\Intro\IntroBasic.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroColumns.cs">
+      <Link>src\benchmark\samples\Intro\IntroColumns.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroCommandStyle.cs">
+      <Link>src\benchmark\samples\Intro\IntroCommandStyle.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroConfigSource.cs">
+      <Link>src\benchmark\samples\Intro\IntroConfigSource.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroConfigUnion.cs">
+      <Link>src\benchmark\samples\Intro\IntroConfigUnion.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroEmpty.cs">
+      <Link>src\benchmark\samples\Intro\IntroEmpty.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroExporters.cs">
+      <Link>src\benchmark\samples\Intro\IntroExporters.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroFluentConfigBuilder.cs">
+      <Link>src\benchmark\samples\Intro\IntroFluentConfigBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroGcMode.cs">
+      <Link>src\benchmark\samples\Intro\IntroGcMode.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroJobsFull.cs">
+      <Link>src\benchmark\samples\Intro\IntroJobsFull.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroJsonExport.cs">
+      <Link>src\benchmark\samples\Intro\IntroJsonExport.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroOrderAttr.cs">
+      <Link>src\benchmark\samples\Intro\IntroOrderAttr.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroOrderManual.cs">
+      <Link>src\benchmark\samples\Intro\IntroOrderManual.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroOutliers.cs">
+      <Link>src\benchmark\samples\Intro\IntroOutliers.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroParams.cs">
+      <Link>src\benchmark\samples\Intro\IntroParams.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroPercentiles.cs">
+      <Link>src\benchmark\samples\Intro\IntroPercentiles.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroRankColumn.cs">
+      <Link>src\benchmark\samples\Intro\IntroRankColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroTags.cs">
+      <Link>src\benchmark\samples\Intro\IntroTags.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Intro\IntroUnstable.cs">
+      <Link>src\benchmark\samples\Intro\IntroUnstable.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_ArraySumLoopUnrolling.cs">
+      <Link>src\benchmark\samples\JIT\Jit_ArraySumLoopUnrolling.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_AsVsCast.cs">
+      <Link>src\benchmark\samples\JIT\Jit_AsVsCast.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_Bce.cs">
+      <Link>src\benchmark\samples\JIT\Jit_Bce.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_BoolToInt.cs">
+      <Link>src\benchmark\samples\JIT\Jit_BoolToInt.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_GenericsMethod.cs">
+      <Link>src\benchmark\samples\JIT\Jit_GenericsMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_Inlining.cs">
+      <Link>src\benchmark\samples\JIT\Jit_Inlining.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_InterfaceMethod.cs">
+      <Link>src\benchmark\samples\JIT\Jit_InterfaceMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_LoopUnrolling.cs">
+      <Link>src\benchmark\samples\JIT\Jit_LoopUnrolling.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_RegistersVsStack.cs">
+      <Link>src\benchmark\samples\JIT\Jit_RegistersVsStack.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\JIT\Jit_RotateBits.cs">
+      <Link>src\benchmark\samples\JIT\Jit_RotateBits.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Other\Array_AccessNormalRefUnsafe.cs">
+      <Link>src\benchmark\samples\Other\Array_AccessNormalRefUnsafe.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Other\Array_HeapAllocVsStackAlloc.cs">
+      <Link>src\benchmark\samples\Other\Array_HeapAllocVsStackAlloc.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Other\File_StreamVsMemoryMapperVewStream.cs">
+      <Link>src\benchmark\samples\Other\File_StreamVsMemoryMapperVewStream.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Other\Math_DoubleSqrt.cs">
+      <Link>src\benchmark\samples\Other\Math_DoubleSqrt.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Other\Math_DoubleSqrtAvx.cs">
+      <Link>src\benchmark\samples\Other\Math_DoubleSqrtAvx.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Other\Os_Sleep.cs">
+      <Link>src\benchmark\samples\Other\Os_Sleep.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\samples\Other\Reflection_Invoke.cs">
+      <Link>src\benchmark\samples\Other\Reflection_Invoke.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\SerializeTest.cs">
+      <Link>src\benchmark\serializers\SerializeTest.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\protobuf\protobuf.cs">
+      <Link>src\benchmark\serializers\protobuf\protobuf.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\protobuf\gen-csharp\Stress.cs">
+      <Link>src\benchmark\serializers\protobuf\gen-csharp\Stress.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\protonet\protonet.cs">
+      <Link>src\benchmark\serializers\protonet\protonet.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\prototuple\prototuple.cs">
+      <Link>src\benchmark\serializers\prototuple\prototuple.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\sbe\sbe.cs">
+      <Link>src\benchmark\serializers\sbe\sbe.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\sbe\gen-csharp\Complex.cs">
+      <Link>src\benchmark\serializers\sbe\gen-csharp\Complex.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\sbe\gen-csharp\GroupSizeEncoding.cs">
+      <Link>src\benchmark\serializers\sbe\gen-csharp\GroupSizeEncoding.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\sbe\gen-csharp\MessageHeader.cs">
+      <Link>src\benchmark\serializers\sbe\gen-csharp\MessageHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\sbe\gen-csharp\MetaAttribute.cs">
+      <Link>src\benchmark\serializers\sbe\gen-csharp\MetaAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\sbe\gen-csharp\Simple.cs">
+      <Link>src\benchmark\serializers\sbe\gen-csharp\Simple.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\sbe\gen-csharp\SimpleType.cs">
+      <Link>src\benchmark\serializers\sbe\gen-csharp\SimpleType.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\thrift.cs">
+      <Link>src\benchmark\serializers\thrift\thrift.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\CoRec.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\CoRec.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\CoRec2.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\CoRec2.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\Complex.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\Complex.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\ComplexList.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\ComplexList.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\OneOfEach.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\OneOfEach.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\RecList.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\RecList.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\RecTree.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\RecTree.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\Simple.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\Simple.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thrift\gen-csharp\thrift\VectorTest.cs">
+      <Link>src\benchmark\serializers\thrift\gen-csharp\thrift\VectorTest.cs</Link>
+    </Compile>
+    <Compile Include="..\benchmark\serializers\thriftnet\protothrift.cs">
+      <Link>src\benchmark\serializers\thriftnet\protothrift.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="..\serializers\.DS_Store">
+      <Link>src\serializers\.DS_Store</Link>
+    </None>
+    <None Include="..\serializers\project.json">
+      <Link>src\serializers\project.json</Link>
+    </None>
+    <None Include="..\serializers\project.lock.json">
+      <Link>src\serializers\project.lock.json</Link>
+    </None>
+    <None Include="..\serializers\sbe\src\Adaptive.SimpleBinaryEncoding.csproj">
+      <Link>src\serializers\sbe\src\Adaptive.SimpleBinaryEncoding.csproj</Link>
+    </None>
+    <None Include="..\serializers\sbe\src\DotNetPort-Notes.txt">
+      <Link>src\serializers\sbe\src\DotNetPort-Notes.txt</Link>
+    </None>
+    <None Include="..\serializers\thrift\src\.DS_Store">
+      <Link>src\serializers\thrift\src\.DS_Store</Link>
+    </None>
+    <None Include="..\serializers\thrift\src\.vscode\launch.json">
+      <Link>src\serializers\thrift\src\.vscode\launch.json</Link>
+    </None>
+    <None Include="..\serializers\thrift\src\.vscode\tasks.json">
+      <Link>src\serializers\thrift\src\.vscode\tasks.json</Link>
+    </None>
+    <None Include="..\serializers\thrift\src\Transport\.DS_Store">
+      <Link>src\serializers\thrift\src\Transport\.DS_Store</Link>
+    </None>
+    <None Include="..\utils\project.json">
+      <Link>src\utils\project.json</Link>
+    </None>
+    <None Include="..\utils\project.lock.json">
+      <Link>src\utils\project.lock.json</Link>
+    </None>
+    <None Include="..\benchmark\serializers\protobuf\gen.sh">
+      <Link>src\benchmark\serializers\protobuf\gen.sh</Link>
+    </None>
+    <None Include="..\benchmark\serializers\protobuf\stress.proto">
+      <Link>src\benchmark\serializers\protobuf\stress.proto</Link>
+    </None>
+    <None Include="..\benchmark\serializers\sbe\SbeTool.jar">
+      <Link>src\benchmark\serializers\sbe\SbeTool.jar</Link>
+    </None>
+    <None Include="..\benchmark\serializers\sbe\car.xml">
+      <Link>src\benchmark\serializers\sbe\car.xml</Link>
+    </None>
+    <None Include="..\benchmark\serializers\sbe\gen.sh">
+      <Link>src\benchmark\serializers\sbe\gen.sh</Link>
+    </None>
+    <None Include="..\benchmark\serializers\sbe\stress.xml">
+      <Link>src\benchmark\serializers\sbe\stress.xml</Link>
+    </None>
+    <None Include="..\benchmark\serializers\thrift\gen.sh">
+      <Link>src\benchmark\serializers\thrift\gen.sh</Link>
+    </None>
+    <None Include="..\benchmark\serializers\thrift\stress.thrift">
+      <Link>src\benchmark\serializers\thrift\stress.thrift</Link>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <TextStylePolicy FileWidth="80" TabWidth="4" TabsToSpaces="True" IndentWidth="4" RemoveTrailingWhitespace="True" NoTabsAfterNonTabs="False" EolMarker="Native" inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/x-csharp" />
+          <CSharpFormattingPolicy IndentBlock="True" IndentBraces="False" IndentSwitchCaseSection="True" LabelPositioning="OneLess" NewLinesForBracesInTypes="True" NewLinesForBracesInMethods="True" SpaceWithinMethodDeclarationParenthesis="False" SpaceBetweenEmptyMethodDeclarationParentheses="False" SpaceWithinMethodCallParentheses="False" SpaceBetweenEmptyMethodCallParentheses="False" SpaceAfterControlFlowStatementKeyword="True" SpaceWithinExpressionParentheses="False" SpaceWithinCastParentheses="False" SpaceWithinOtherParentheses="False" SpaceAfterCast="False" SpacesIgnoreAroundVariableDeclaration="False" SpaceBetweenEmptySquareBrackets="False" SpaceWithinSquareBrackets="False" SpaceAfterColonInBaseTypeDeclaration="True" SpaceAfterComma="True" SpaceAfterDot="False" SpaceAfterSemicolonsInForStatement="True" SpaceBeforeColonInBaseTypeDeclaration="True" SpaceBeforeComma="False" SpaceBeforeDot="False" SpaceBeforeSemicolonsInForStatement="False" SpacingAroundBinaryOperator="Single" WrappingPreserveSingleLine="True" WrappingKeepStatementsOnSingleLine="True" PlaceSystemDirectiveFirst="True" IndentSwitchSection="True" NewLinesForBracesInProperties="True" NewLinesForBracesInAccessors="True" NewLinesForBracesInAnonymousMethods="True" NewLinesForBracesInControlBlocks="True" NewLinesForBracesInAnonymousTypes="True" NewLinesForBracesInObjectCollectionArrayInitializers="True" NewLinesForBracesInLambdaExpressionBody="True" NewLineForElse="True" NewLineForCatch="True" NewLineForFinally="True" NewLineForMembersInObjectInit="True" NewLineForMembersInAnonymousTypes="True" NewLineForClausesInQuery="True" SpacingAfterMethodDeclarationName="False" SpaceAfterMethodCallName="False" SpaceBeforeOpenSquareBracket="False" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
+          <TextStylePolicy TabWidth="4" IndentWidth="4" RemoveTrailingWhitespace="True" NoTabsAfterNonTabs="False" EolMarker="Native" FileWidth="120" TabsToSpaces="False" inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/plain" />
+          <TextStylePolicy inheritsSet="null" scope="application/config+xml" />
+          <XmlFormattingPolicy inheritsSet="null" scope="application/config+xml" />
+          <TextStylePolicy inheritsSet="null" scope="application/xml" />
+          <XmlFormattingPolicy inheritsSet="Mono" inheritsScope="application/xml" scope="application/xml">
+            <DefaultFormat OmitXmlDeclaration="False" NewLineChars="&#xA;" IndentContent="True" ContentIndentString="&#x9;" AttributesInNewLine="False" MaxAttributesPerLine="10" AttributesIndentString="&#x9;" WrapAttributes="False" AlignAttributes="False" AlignAttributeValues="False" QuoteChar="&quot;" SpacesBeforeAssignment="0" SpacesAfterAssignment="0" EmptyLinesBeforeStart="0" EmptyLinesAfterStart="0" EmptyLinesBeforeEnd="0" EmptyLinesAfterEnd="0" />
+          </XmlFormattingPolicy>
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
+  <Import Project="packages\Microsoft.Diagnostics.Tracing.TraceEvent.1.0.41\build\Microsoft.Diagnostics.Tracing.TraceEvent.targets" Condition="Exists('packages\Microsoft.Diagnostics.Tracing.TraceEvent.1.0.41\build\Microsoft.Diagnostics.Tracing.TraceEvent.targets')" />
+  <Import Project="packages\Bond.CSharp.5.1.0\build\Bond.CSharp.targets" Condition="Exists('packages\Bond.CSharp.5.1.0\build\Bond.CSharp.targets')" />
+</Project>
