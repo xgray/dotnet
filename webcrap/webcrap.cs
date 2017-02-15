@@ -62,6 +62,7 @@ namespace webcrap
       if (this.DumpCookies)
       {
         Dump(response.ResponseUri.AbsolutePath, response.Cookies);
+        Dump2(response.ResponseUri.AbsolutePath, response.Cookies);        
       }
 
       if (this.PrintContent)
@@ -119,23 +120,25 @@ namespace webcrap
     [Proto]
     public class PCookie
     {
-      [ProtoColumnAttribute(1)]
-      public string Name { get; set; }
-
-      [ProtoColumnAttribute(2)]
-      public string Value { get; set; }
-
-      [ProtoColumnAttribute(3)]
-      public bool Expired { get; set; }
-
-      [ProtoColumnAttribute(4)]
-      public DateTime Timestamp { get; set; }
+      [ProtoColumn(1)] public string Name { get; set; }
+      [ProtoColumn(2)] public string Value { get; set; }
+      [ProtoColumn(3)] public int Version { get; set; }
+      [ProtoColumn(4)] public string Comment { get; set; }
+      [ProtoColumn(5)] public string CommentUri { get; set; }
+      [ProtoColumn(6)] public string Domain { get; set; }
+      [ProtoColumn(7)] public string Port { get; set; }
+      [ProtoColumn(8)] public string Path { get; set; }
+      [ProtoColumn(9)] public bool Expired { get; set; }
+      [ProtoColumn(10)] public DateTime Expires { get; set; }
+      [ProtoColumn(11)] public bool HttpOnly { get; set; }
+      [ProtoColumn(12)] public bool Secure { get; set; }
+      [ProtoColumn(13)] public DateTime Timestamp { get; set; }
     }
 
     [Proto]
     public class PCookies
     {
-      [ProtoColumnAttribute(1)]
+      [ProtoColumn(1)]
       public Dictionary<string, List<PCookie>> Cookies { get; set; }
     }
 
@@ -148,7 +151,16 @@ namespace webcrap
         {
           Name = cookie.Name,
           Value = cookie.Value,
+          Version = cookie.Version,
+          Comment = cookie.Comment,
+          CommentUri = cookie.CommentUri?.AbsolutePath,
+          Domain = cookie.Domain,
+          Port = cookie.Port,
+          Path = cookie.Path,          
           Expired = cookie.Expired,
+          Expires = cookie.Expires,
+          HttpOnly = cookie.HttpOnly,
+          Secure = cookie.Secure,
           Timestamp = cookie.TimeStamp
         };
         list.Add(c);
@@ -161,16 +173,12 @@ namespace webcrap
         Cookies = dict
       };
 
-      TByteBuffer trans = new TByteBuffer(102400);
-      TJSONProtocol prot = new TJSONProtocol(trans);
-
-      Proto<PCookies>.Write(prot, cc);
-
-      string json = System.Text.Encoding.UTF8.GetString(trans.GetBuffer(), 0, trans.Length);
+      
+      string json = Proto<PCookies>.GetJson(cc);
       Console.WriteLine(json);
       Console.WriteLine();
-
-      Dump2(url, cookies);
+      Console.WriteLine(Proto<PCookies>.GetJson(Proto<PCookies>.FromJson(json)));
+      Console.WriteLine();
     }
 
     static void Dump2(string url, CookieCollection cookies)
@@ -188,7 +196,6 @@ namespace webcrap
           Port = cookie.Port,
           Comment = cookie.Comment,
           CommentUri = cookie.CommentUri?.AbsolutePath,
-
           Expired = cookie.Expired,
           Expires = cookie.Expires.ToUniversalTime().Ticks,
           HttpOnly = cookie.HttpOnly,
@@ -206,10 +213,27 @@ namespace webcrap
       };
 
       TByteBuffer trans = new TByteBuffer(102400);
-      TJSONProtocol prot = new TJSONProtocol(trans);
+      TProtocol prot = new TSimpleJSONProtocol(trans);
       cc.Write(prot);
-      string json = System.Text.Encoding.UTF8.GetString(trans.GetBuffer(), 0, trans.Length);
+      string json = Encoding.UTF8.GetString(trans.GetBuffer(), 0, trans.Length);
       Console.WriteLine(json);
+      Console.WriteLine();
+
+
+      TMemoryBuffer trans1 = new TMemoryBuffer(Encoding.UTF8.GetBytes(json));
+      TProtocol prot1 = new TSimpleJSONProtocol(trans1);
+
+      Cookies cs = new Cookies();
+      cs.Read(prot1);
+
+      TByteBuffer trans2 = new TByteBuffer(102400);
+      TProtocol prot2 = new TSimpleJSONProtocol(trans2);
+      cs.Write(prot2);
+      string json2 = Encoding.UTF8.GetString(trans2.GetBuffer(), 0, trans2.Length);
+      Console.WriteLine(json2);
+      Console.WriteLine();
+      
+
 
     }
   }

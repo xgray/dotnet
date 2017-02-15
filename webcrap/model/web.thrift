@@ -13,19 +13,18 @@ struct Cookie {
   5: string commentUri,
   6: string domain,
   7: string port,
-  9: string path,
+  8: string path,
 
-  10: bool expired,
-  11: i64 expires,
-  12: bool httpOnly,
-  13: bool secure,
-  14: i64 timestamp
+  9: bool expired,
+  10: i64 expires,
+  11: bool httpOnly,
+  12: bool secure,
+  13: i64 timestamp
 }
 
 struct Cookies
 {
   1: map<string, list<Cookie>> cookies
-  2: Cookie cookie
 }
 
 struct Simple {

@@ -6,10 +6,12 @@ namespace Thrift.Net
   using System.Linq;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Text;
 
   using Bench;
 
   using Thrift.Protocol;
+  using Thrift.Transport;
 
   public sealed class Proto<T> where T : new()
   {
@@ -54,6 +56,24 @@ namespace Thrift.Net
     //     return null;
     //   }
     // }
+
+    public static string GetJson(T value)
+    {
+      TMemoryBuffer trans = new TMemoryBuffer();
+      TProtocol prot = new TSimpleJSONProtocol(trans);
+
+      Proto<T>.Write(prot, value);
+      byte[] buffer = trans.GetBuffer();
+      return Encoding.UTF8.GetString(buffer);
+    }
+
+    public static T FromJson(string json)
+    {
+      TMemoryBuffer trans = new TMemoryBuffer(Encoding.UTF8.GetBytes(json));
+      TProtocol prot = new TSimpleJSONProtocol(trans);
+
+      return Proto<T>.Read(prot);
+    }
 
     public static T Read(TProtocol iprot)
     {
