@@ -5,7 +5,7 @@
  *  @generated
  */
 
-namespace protothrift
+namespace thriftnet
 {
   using System;
   using System.Collections.Generic;
@@ -20,11 +20,11 @@ namespace protothrift
   using Thrift.Protocol;
   using Thrift.Transport;
 
-  using ProtoThrift;
+  using Thrift.Net;
 
-  [CommandModule(ShortName = "protothrift")]
+  [CommandModule(ShortName = "thriftnet")]
   [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
-  public class ProtoThriftBench : SerializeTest
+  public class ThriftNetBench : SerializeTest
   {
     [CommandLineParameter]
     public string simpleValue = "abc";

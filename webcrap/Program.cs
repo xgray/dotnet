@@ -13,7 +13,7 @@ namespace webcrap
   using Thrift.Protocol;
   using Thrift.Collections;
   using Thrift.Transport;
-  using ProtoThrift;
+  using Thrift.Net;
 
   using webcrap.web;
   using Bench;

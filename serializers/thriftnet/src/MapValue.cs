@@ -1,5 +1,5 @@
 ﻿
-namespace ProtoThrift
+namespace Thrift.Net
 {
   using System;
   using System.Collections.Generic;
