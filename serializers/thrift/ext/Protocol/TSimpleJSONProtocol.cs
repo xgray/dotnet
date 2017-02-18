@@ -625,32 +625,34 @@ namespace Thrift.Protocol
 
         public override void WriteFieldBegin(TField field)
         {
-            WriteString(field.Name);
-            WriteJSONArrayStart();
-            WriteJSONInteger(field.ID);
-            WriteJSONString(GetTypeNameForTypeID(field.Type));
+            string fieldName = string.Format(
+                "{0}:{1}:{2}", 
+                field.ID, 
+                Encoding.UTF8.GetString(GetTypeNameForTypeID(field.Type)),
+                field.Name);
+            WriteString(fieldName);
         }
 
         public override void WriteFieldEnd()
         {
-            WriteJSONArrayEnd();
         }
 
         public override void WriteFieldStop() { }
 
         public override void WriteMapBegin(TMap map)
         {
-            WriteJSONArrayStart();
-            WriteJSONString(GetTypeNameForTypeID(map.KeyType));
-            WriteJSONString(GetTypeNameForTypeID(map.ValueType));
-            WriteJSONInteger(map.Count);
             WriteJSONObjectStart();
+            WriteString(string.Format(
+                "{0}:{1}",
+                Encoding.UTF8.GetString(GetTypeNameForTypeID(map.KeyType)),
+                Encoding.UTF8.GetString(GetTypeNameForTypeID(map.ValueType))
+            ));
+            WriteJSONInteger(map.Count);
         }
 
         public override void WriteMapEnd()
         {
             WriteJSONObjectEnd();
-            WriteJSONArrayEnd();
         }
 
         public override void WriteListBegin(TList list)
@@ -1030,34 +1032,47 @@ namespace Thrift.Protocol
             }
             else
             {
-                field.Name = ReadString();
-                ReadJSONArrayStart();
-                field.ID = (short)ReadJSONInteger();
-                field.Type = GetTypeIDForTypeName(ReadJSONString(false));
+                string fieldName = ReadString();
+                string[] parts = fieldName.Split(':');
+                if( parts.Length != 3)
+                {
+                    throw new TProtocolException(TProtocolException.INVALID_DATA,
+                                                 "Unrecognized field name");
+                }
+
+                field.ID = short.Parse(parts[0]);
+                field.Type = GetTypeIDForTypeName(Encoding.UTF8.GetBytes(parts[1]));
+                field.Name = parts[2];
             }
             return field;
         }
 
         public override void ReadFieldEnd()
         {
-            ReadJSONArrayEnd();
         }
 
         public override TMap ReadMapBegin()
         {
             TMap map = new TMap();
-            ReadJSONArrayStart();
-            map.KeyType = GetTypeIDForTypeName(ReadJSONString(false));
-            map.ValueType = GetTypeIDForTypeName(ReadJSONString(false));
-            map.Count = (int)ReadJSONInteger();
             ReadJSONObjectStart();
+
+            string type = ReadString();
+            string[] parts = type.Split(':');
+            if( parts.Length != 2)
+            {
+                throw new TProtocolException(TProtocolException.INVALID_DATA,
+                                                "Unrecognized map data");
+            }
+
+            map.KeyType = GetTypeIDForTypeName(Encoding.UTF8.GetBytes(parts[0]));
+            map.ValueType = GetTypeIDForTypeName(Encoding.UTF8.GetBytes(parts[1]));
+            map.Count = (int)ReadJSONInteger();
             return map;
         }
 
         public override void ReadMapEnd()
         {
             ReadJSONObjectEnd();
-            ReadJSONArrayEnd();
         }
 
         public override TList ReadListBegin()
