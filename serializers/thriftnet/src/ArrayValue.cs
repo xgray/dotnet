@@ -8,7 +8,7 @@ namespace Thrift.Net
   using Bench;
   using Thrift.Protocol;
 
-  public class ArrayValue<V> : IProtoValue<V[]>
+  public class ArrayValue<V> : IProtoValue<V[]>, IThriftListValue
   {
     public ArrayValue(IProtoValue<V> valueMetadata)
     {
@@ -20,6 +20,11 @@ namespace Thrift.Net
     public TType Type
     {
       get { return TType.List; }
+    }
+
+    TType IThriftListValue.ValueType
+    {
+      get { return this.ValueMetadata.Type; }
     }
 
     public Expression Read(Expression iprot)

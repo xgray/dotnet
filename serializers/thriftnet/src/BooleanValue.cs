@@ -11,7 +11,7 @@ namespace Thrift.Net
   /// <summary>
   /// BooleanColumn Type
   /// </summary>
-  public class BooleanValue : IProtoValue<bool>
+  public class BooleanValue : IProtoValue<bool>  
   {
     public TType Type
     {

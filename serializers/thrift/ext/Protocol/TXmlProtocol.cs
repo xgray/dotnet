@@ -1,0 +1,418 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ * Contains some contributions under the Thrift Software License.
+ * Please see doc/old-thrift-license.txt in the Thrift distribution for
+ * details.
+ */
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Xml;
+
+using Bench;
+using Thrift.Transport;
+
+namespace Thrift.Protocol
+{
+  public class TXmlProtocol : TProtocol
+  {
+    private StringBuilder sb;
+
+    private XmlWriter writer;
+    private XmlReader reader;
+
+    private Stack<IXmlContext> stack;
+
+    public TXmlProtocol(TTransport trans) : base(trans)
+    {
+      this.sb = new StringBuilder();
+
+      XmlWriterSettings settings = new XmlWriterSettings
+      {
+        Indent = true,
+        IndentChars = "  ",
+        OmitXmlDeclaration = true,
+      };
+
+      this.writer = XmlWriter.Create(sb, settings);
+
+      this.reader = XmlReader.Create(new StringReader(""));
+
+      this.stack = new Stack<IXmlContext>();
+      this.stack.Push(new StructContext(this.writer));
+    }
+
+    private IXmlContext Context
+    {
+      get { return this.stack.Peek(); }
+    }
+
+    public override String ToString()
+    {
+      this.writer.Flush();
+      return sb.ToString();
+    }
+
+    public override void WriteMessageBegin(TMessage message)
+    {
+      this.Context.WriteBegin(message.Name);
+      this.stack.Push(new StructContext(this.writer));
+    }
+
+    public override void WriteMessageEnd()
+    {
+      this.stack.Pop();
+      this.Context.WriteEnd();
+    }
+
+    public override void WriteStructBegin(TStruct struc)
+    {
+      this.Context.WriteBegin(struc.Name);
+      this.stack.Push(new StructContext(this.writer));
+    }
+
+    public override void WriteStructEnd()
+    {
+      this.stack.Pop();
+      this.Context.WriteEnd();
+    }
+
+    public override void WriteFieldBegin(TField field)
+    {
+      this.Context.WriteBegin(field.Name);
+      this.writer.WriteAttributeString("id", CommonUtils.ToString(field.ID));
+      this.writer.WriteAttributeString("type", CommonUtils.ToString(field.Type));
+      this.stack.Push(new FieldContext(this.writer));
+    }
+
+    public override void WriteFieldEnd()
+    {
+      this.stack.Pop();
+      this.Context.WriteEnd();
+    }
+
+    public override void WriteFieldStop()
+    {
+    }
+
+    public override void WriteMapBegin(TMap map)
+    {
+      this.Context.WriteBegin(null);
+      this.writer.WriteAttributeString("key", CommonUtils.ToString(map.KeyType));
+      this.writer.WriteAttributeString("value", CommonUtils.ToString(map.ValueType));
+      this.writer.WriteAttributeString("count", CommonUtils.ToString(map.Count));
+      this.stack.Push(new MapContext(this.writer, map.KeyType, map.ValueType));
+    }
+
+    public override void WriteMapEnd()
+    {
+      this.stack.Pop();
+      this.Context.WriteEnd();
+    }
+
+    public override void WriteListBegin(TList list)
+    {
+      this.Context.WriteBegin(null);
+      this.writer.WriteAttributeString("element", CommonUtils.ToString(list.ElementType));
+      this.writer.WriteAttributeString("count", CommonUtils.ToString(list.Count));
+      this.stack.Push(new ListContext(this.writer, list.ElementType));
+    }
+
+    public override void WriteListEnd()
+    {
+      this.stack.Pop();
+      this.Context.WriteEnd();
+    }
+
+    public override void WriteSetBegin(TSet set)
+    {
+      this.Context.WriteBegin(null);
+      this.writer.WriteAttributeString("element", CommonUtils.ToString(set.ElementType));
+      this.writer.WriteAttributeString("count", CommonUtils.ToString(set.Count));
+      this.stack.Push(new ListContext(this.writer, set.ElementType));
+    }
+
+    public override void WriteSetEnd()
+    {
+      this.stack.Pop();
+      this.Context.WriteEnd();
+    }
+
+    public override void WriteBool(bool b)
+    {
+      this.Context.WriteValue(CommonUtils.ToString(b));
+    }
+
+    public override void WriteByte(sbyte b)
+    {
+      this.Context.WriteValue(CommonUtils.ToString((byte)b));
+    }
+
+    public override void WriteI16(short i16)
+    {
+      this.Context.WriteValue(CommonUtils.ToString(i16));
+    }
+
+    public override void WriteI32(int i32)
+    {
+      this.Context.WriteValue(CommonUtils.ToString(i32));
+    }
+
+    public override void WriteI64(long i64)
+    {
+      this.Context.WriteValue(CommonUtils.ToString(i64));
+    }
+
+    public override void WriteDouble(double d)
+    {
+      this.Context.WriteValue(CommonUtils.ToString(d));
+    }
+
+    public override void WriteString(string s)
+    {
+      this.Context.WriteValue(s);
+    }
+
+    public override void WriteBinary(byte[] b)
+    {
+      this.Context.WriteValue(CommonUtils.ToString(b));
+    }
+
+    public override TMessage ReadMessageBegin()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void ReadMessageEnd()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override TStruct ReadStructBegin()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void ReadStructEnd()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override TField ReadFieldBegin()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void ReadFieldEnd()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override TMap ReadMapBegin()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void ReadMapEnd()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override TList ReadListBegin()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void ReadListEnd()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override TSet ReadSetBegin()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void ReadSetEnd()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override bool ReadBool()
+    {
+      return CommonUtils.ToBoolean(this.reader.ReadContentAsString());
+    }
+
+    public override sbyte ReadByte()
+    {
+      return (sbyte)CommonUtils.ToByte(this.reader.ReadContentAsString());
+    }
+
+    public override short ReadI16()
+    {
+      return CommonUtils.ToInt16(this.reader.ReadContentAsString());
+    }
+
+    public override int ReadI32()
+    {
+      return CommonUtils.ToInt32(this.reader.ReadContentAsString());
+    }
+
+    public override long ReadI64()
+    {
+      return CommonUtils.ToInt64(this.reader.ReadContentAsString());
+    }
+
+    public override double ReadDouble()
+    {
+      return CommonUtils.ToDouble(this.reader.ReadContentAsString());
+    }
+
+    public override string ReadString()
+    {
+      return this.reader.ReadContentAsString();
+    }
+    public override byte[] ReadBinary()
+    {
+      return CommonUtils.ToBytes(this.reader.ReadContentAsString());
+    }
+
+    public interface IXmlContext
+    {
+      void WriteBegin(string name);
+      void WriteEnd();
+      void WriteValue(string value);
+    }
+
+    public class StructContext : IXmlContext
+    {
+      private XmlWriter writer;
+
+      public StructContext(XmlWriter writer)
+      {
+        this.writer = writer;
+      }
+
+      public void WriteBegin(string name)
+      {
+        this.writer.WriteStartElement(name);
+      }
+
+      public void WriteValue(string value)
+      {
+        throw new NotImplementedException();
+      }
+
+      public void WriteEnd()
+      {
+        this.writer.WriteEndElement();
+      }
+    }
+
+    public class FieldContext : IXmlContext
+    {
+      private XmlWriter writer;
+
+      public FieldContext(XmlWriter writer)
+      {
+        this.writer = writer;
+      }
+
+      public void WriteBegin(string name)
+      {
+      }
+
+      public void WriteValue(string value)
+      {
+        this.writer.WriteValue(value);
+      }
+
+      public void WriteEnd()
+      {
+      }
+    }
+
+    public class ListContext : IXmlContext
+    {
+      private XmlWriter writer;
+      private TType elementType;
+
+      public ListContext(XmlWriter writer, TType elementType)
+      {
+        this.writer = writer;
+        this.elementType = elementType;
+      }
+
+      public void WriteBegin(string name)
+      {
+        this.writer.WriteStartElement(name ?? "Value");
+      }
+
+      public void WriteValue(string value)
+      {
+        this.writer.WriteElementString("Value", value);
+      }
+
+      public void WriteEnd()
+      {
+        this.writer.WriteEndElement();
+      }
+    }
+
+    public class MapContext : IXmlContext
+    {
+      private bool writeKey = true;
+      private XmlWriter writer;
+      private TType keyType;
+      private TType valueType;
+
+      public MapContext(XmlWriter writer, TType keyType, TType valueType)
+      {
+        this.writer = writer;
+        this.keyType = keyType;
+        this.valueType = valueType;
+      }
+
+      public void WriteBegin(string name)
+      {
+        if (writeKey)
+        {
+          this.writer.WriteStartElement(name ?? "Key");
+        }
+        else
+        {
+          this.writer.WriteStartElement(name ?? "Value");
+        }
+      }
+
+      public void WriteValue(string value)
+      {
+        this.writer.WriteElementString("Value", value);
+      }
+
+      public void WriteEnd()
+      {
+        this.writer.WriteEndElement();
+        writeKey = !writeKey;
+      }
+    }
+  }
+}

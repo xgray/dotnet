@@ -62,7 +62,7 @@ namespace webcrap
       if (this.DumpCookies)
       {
         Dump(response.ResponseUri.AbsolutePath, response.Cookies);
-        Dump2(response.ResponseUri.AbsolutePath, response.Cookies);        
+        // DumpThrift(response.ResponseUri.AbsolutePath, response.Cookies);        
       }
 
       if (this.PrintContent)
@@ -165,23 +165,27 @@ namespace webcrap
         };
         list.Add(c);
       }
-      var dict = new Dictionary<string, List<PCookie>>();
-      dict.Add(url, list);
 
       PCookies cc = new PCookies
       {
-        Cookies = dict
+        Cookies = new Dictionary<string, List<PCookie>>
+        {
+          {url, list}
+        },
       };
 
       
-      string json = Proto<PCookies>.GetJson(cc);
-      Console.WriteLine(json);
-      Console.WriteLine();
-      Console.WriteLine(Proto<PCookies>.GetJson(Proto<PCookies>.FromJson(json)));
+      // string json = Proto<PCookies>.GetJson(cc);
+      // Console.WriteLine(json);
+      // Console.WriteLine();
+      // Console.WriteLine(Proto<PCookies>.GetJson(Proto<PCookies>.FromJson(json)));
+      // Console.WriteLine();
+      string xml = Proto<PCookies>.GetXml(cc);
+      Console.WriteLine(xml);
       Console.WriteLine();
     }
 
-    static void Dump2(string url, CookieCollection cookies)
+    static void DumpThrift(string url, CookieCollection cookies)
     {
       List<webcrap.web.Cookie> list = new List<webcrap.web.Cookie>();
       foreach (System.Net.Cookie cookie in cookies)

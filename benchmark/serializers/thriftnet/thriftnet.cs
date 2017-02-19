@@ -157,6 +157,8 @@ namespace thriftnet
             complexOutput.ArrayValue[i].LongValue);
         }
       }
+
+      WriteLine(Proto<Complex>.GetXml(complexOutput));
     }
 
     [Conditional("DEBUG")]

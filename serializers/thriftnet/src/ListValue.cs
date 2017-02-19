@@ -10,7 +10,12 @@ namespace Thrift.Net
 
   using Thrift.Protocol;
 
-  public class ListValue<V> : IProtoValue<List<V>>
+  public interface IThriftListValue : IThriftValue
+  {
+    TType ValueType { get; }
+  }
+
+  public class ListValue<V> : IProtoValue<List<V>>, IThriftListValue
   {
     public ListValue(IProtoValue<V> valueMetadata)
     {
@@ -22,6 +27,11 @@ namespace Thrift.Net
     public TType Type
     {
       get { return TType.List; }
+    }
+
+    TType IThriftListValue.ValueType
+    {
+      get { return this.ValueMetadata.Type; }
     }
 
     public Expression Read(Expression iprot)

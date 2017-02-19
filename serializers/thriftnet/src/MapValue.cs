@@ -9,7 +9,14 @@ namespace Thrift.Net
   using Bench;
   using Thrift.Protocol;
 
-  public class MapValue<K, V> : IProtoValue<Dictionary<K, V>>
+  public interface IThriftMapValue : IThriftValue
+  {
+    TType KeyType { get; }
+
+    TType ValueType { get; }
+  }
+
+  public class MapValue<K, V> : IProtoValue<Dictionary<K, V>>, IThriftMapValue
   {
     public MapValue(IProtoValue<K> keyMetadata, IProtoValue<V> valueMetadata)
     {
@@ -24,6 +31,16 @@ namespace Thrift.Net
     public TType Type
     {
       get { return TType.Map; }
+    }
+
+    TType IThriftMapValue.KeyType
+    {
+      get { return this.KeyMetadata.Type; }
+    }
+
+    TType IThriftMapValue.ValueType
+    {
+      get { return this.ValueMetadata.Type; }
     }
 
     public Expression Read(Expression iprot)

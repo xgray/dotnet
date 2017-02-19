@@ -35,10 +35,10 @@ namespace Thrift.Net
       this.columns = columns;
     }
 
-    // public static IProtoColumn<T>[] Columns
-    // {
-    //   get { return instance.Value.columns; }
-    // }
+    public static IProtoColumn<T>[] Columns
+    {
+      get { return instance.Value.columns; }
+    }
 
     public static void Validate()
     {
@@ -56,6 +56,15 @@ namespace Thrift.Net
     //     return null;
     //   }
     // }
+
+    public static string GetXml(T value)
+    {
+      TMemoryBuffer trans = new TMemoryBuffer();
+      TXmlProtocol prot = new TXmlProtocol(trans);
+
+      Proto<T>.Write(prot, value);
+      return prot.ToString();
+    }
 
     public static string GetJson(T value)
     {

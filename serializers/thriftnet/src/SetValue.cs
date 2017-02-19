@@ -9,7 +9,12 @@ namespace Thrift.Net
   using Bench;
   using Thrift.Protocol;
 
-  public class SetValue<V> : IProtoValue<HashSet<V>>
+  public interface IThriftSetValue
+  {
+    TType ValueType { get; }
+  }
+
+  public class SetValue<V> : IProtoValue<HashSet<V>>, IThriftSetValue
   {
     public SetValue(IProtoValue<V> valueMetadata)
     {
@@ -21,6 +26,11 @@ namespace Thrift.Net
     public TType Type
     {
       get { return TType.Set; }
+    }
+
+    TType IThriftSetValue.ValueType
+    {
+      get { return this.ValueMetadata.Type; }
     }
 
     public Expression Read(Expression iprot)

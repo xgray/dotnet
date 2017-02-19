@@ -8,10 +8,14 @@ namespace Thrift.Net
 
   using Thrift.Protocol;
 
-  public interface IProtoValue
+  public interface IThriftValue
   {
     TType Type { get; }
+  }
 
+
+  public interface IProtoValue : IThriftValue
+  {
     Expression Read(Expression iprot);
 
     Expression Write(Expression oprot, Expression value);
@@ -24,7 +28,6 @@ namespace Thrift.Net
 
     void Write(TProtocol oprot, V value);
   }
-
   public interface IProtoColumn<T>
   {
     PropertyInfo PropertyInfo { get; }

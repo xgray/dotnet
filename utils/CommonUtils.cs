@@ -935,6 +935,31 @@ namespace Bench
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
+        public static string ToString(Enum value)
+        {
+            return value.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static T ToEnum<T>(string str)
+        {
+            return (T)Enum.Parse(typeof(T), str);
+        }
+
+        public static bool TryEnum<T>(string str, out T value) where T : struct
+        {
+            return Enum.TryParse<T>(str, out value);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string ToString(short value)
         {
             return value.ToString();
