@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Xml;
 
 using Bench;
@@ -34,16 +33,16 @@ namespace Thrift.Protocol
 {
   public class TXmlProtocol : TProtocol
   {
-    private StringBuilder sb;
-
     private XmlWriter writer;
     private XmlReader reader;
+
+    private int writeDepth = 0;
 
     private Stack<IXmlContext> stack;
 
     public TXmlProtocol(TTransport trans) : base(trans)
     {
-      this.sb = new StringBuilder();
+      Stream stream = new TTransportStream(trans);
 
       XmlWriterSettings settings = new XmlWriterSettings
       {
@@ -52,12 +51,11 @@ namespace Thrift.Protocol
         OmitXmlDeclaration = true,
       };
 
-      this.writer = XmlWriter.Create(sb, settings);
-
-      this.reader = XmlReader.Create(new StringReader(""));
+      this.writer = XmlWriter.Create(stream, settings);
+      this.reader = XmlReader.Create(stream);
 
       this.stack = new Stack<IXmlContext>();
-      this.stack.Push(new StructContext(this.writer));
+      this.stack.Push(new StructContext(this));
     }
 
     private IXmlContext Context
@@ -65,34 +63,41 @@ namespace Thrift.Protocol
       get { return this.stack.Peek(); }
     }
 
-    public override String ToString()
-    {
-      this.writer.Flush();
-      return sb.ToString();
-    }
-
     public override void WriteMessageBegin(TMessage message)
     {
+      this.writeDepth++;
       this.Context.WriteBegin(message.Name);
-      this.stack.Push(new StructContext(this.writer));
+      this.stack.Push(new StructContext(this));
     }
 
     public override void WriteMessageEnd()
     {
       this.stack.Pop();
       this.Context.WriteEnd();
+      if( --this.writeDepth == 0)
+      {
+          this.writer.Flush();
+      }
     }
 
     public override void WriteStructBegin(TStruct struc)
     {
+      this.writeDepth++;
+      Console.WriteLine("WriteStructBegin");
       this.Context.WriteBegin(struc.Name);
-      this.stack.Push(new StructContext(this.writer));
+      this.stack.Push(new StructContext(this));
     }
 
     public override void WriteStructEnd()
     {
       this.stack.Pop();
       this.Context.WriteEnd();
+      Console.WriteLine(this.recursionDepth);
+      
+      if( --this.writeDepth == 0)
+      {
+          this.writer.Flush();
+      }
     }
 
     public override void WriteFieldBegin(TField field)
@@ -100,7 +105,7 @@ namespace Thrift.Protocol
       this.Context.WriteBegin(field.Name);
       this.writer.WriteAttributeString("id", CommonUtils.ToString(field.ID));
       this.writer.WriteAttributeString("type", CommonUtils.ToString(field.Type));
-      this.stack.Push(new FieldContext(this.writer));
+      this.stack.Push(new FieldContext(this));
     }
 
     public override void WriteFieldEnd()
@@ -119,7 +124,7 @@ namespace Thrift.Protocol
       this.writer.WriteAttributeString("key", CommonUtils.ToString(map.KeyType));
       this.writer.WriteAttributeString("value", CommonUtils.ToString(map.ValueType));
       this.writer.WriteAttributeString("count", CommonUtils.ToString(map.Count));
-      this.stack.Push(new MapContext(this.writer, map.KeyType, map.ValueType));
+      this.stack.Push(new MapContext(this, map.KeyType, map.ValueType));
     }
 
     public override void WriteMapEnd()
@@ -133,7 +138,7 @@ namespace Thrift.Protocol
       this.Context.WriteBegin(null);
       this.writer.WriteAttributeString("element", CommonUtils.ToString(list.ElementType));
       this.writer.WriteAttributeString("count", CommonUtils.ToString(list.Count));
-      this.stack.Push(new ListContext(this.writer, list.ElementType));
+      this.stack.Push(new ListContext(this, list.ElementType));
     }
 
     public override void WriteListEnd()
@@ -147,7 +152,7 @@ namespace Thrift.Protocol
       this.Context.WriteBegin(null);
       this.writer.WriteAttributeString("element", CommonUtils.ToString(set.ElementType));
       this.writer.WriteAttributeString("count", CommonUtils.ToString(set.Count));
-      this.stack.Push(new ListContext(this.writer, set.ElementType));
+      this.stack.Push(new ListContext(this, set.ElementType));
     }
 
     public override void WriteSetEnd()
@@ -198,6 +203,7 @@ namespace Thrift.Protocol
 
     public override TMessage ReadMessageBegin()
     {
+      
       throw new NotImplementedException();
     }
 
@@ -304,16 +310,16 @@ namespace Thrift.Protocol
 
     public class StructContext : IXmlContext
     {
-      private XmlWriter writer;
+      private TXmlProtocol prot;
 
-      public StructContext(XmlWriter writer)
+      public StructContext(TXmlProtocol prot)
       {
-        this.writer = writer;
+        this.prot = prot;
       }
 
       public void WriteBegin(string name)
       {
-        this.writer.WriteStartElement(name);
+        this.prot.writer.WriteStartElement(name);
       }
 
       public void WriteValue(string value)
@@ -323,17 +329,17 @@ namespace Thrift.Protocol
 
       public void WriteEnd()
       {
-        this.writer.WriteEndElement();
+        this.prot.writer.WriteEndElement();
       }
     }
 
     public class FieldContext : IXmlContext
     {
-      private XmlWriter writer;
+      private TXmlProtocol prot;
 
-      public FieldContext(XmlWriter writer)
+      public FieldContext(TXmlProtocol prot)
       {
-        this.writer = writer;
+        this.prot = prot;
       }
 
       public void WriteBegin(string name)
@@ -342,7 +348,7 @@ namespace Thrift.Protocol
 
       public void WriteValue(string value)
       {
-        this.writer.WriteValue(value);
+        this.prot.writer.WriteValue(value);
       }
 
       public void WriteEnd()
@@ -352,41 +358,41 @@ namespace Thrift.Protocol
 
     public class ListContext : IXmlContext
     {
-      private XmlWriter writer;
+      private TXmlProtocol prot;
       private TType elementType;
 
-      public ListContext(XmlWriter writer, TType elementType)
+      public ListContext(TXmlProtocol prot, TType elementType)
       {
-        this.writer = writer;
+        this.prot = prot;
         this.elementType = elementType;
       }
 
       public void WriteBegin(string name)
       {
-        this.writer.WriteStartElement(name ?? "Value");
+        this.prot.writer.WriteStartElement(name ?? "Value");
       }
 
       public void WriteValue(string value)
       {
-        this.writer.WriteElementString("Value", value);
+        this.prot.writer.WriteElementString("Value", value);
       }
 
       public void WriteEnd()
       {
-        this.writer.WriteEndElement();
+        this.prot.writer.WriteEndElement();
       }
     }
 
     public class MapContext : IXmlContext
     {
       private bool writeKey = true;
-      private XmlWriter writer;
+      private TXmlProtocol prot;
       private TType keyType;
       private TType valueType;
 
-      public MapContext(XmlWriter writer, TType keyType, TType valueType)
+      public MapContext(TXmlProtocol prot, TType keyType, TType valueType)
       {
-        this.writer = writer;
+        this.prot = prot;
         this.keyType = keyType;
         this.valueType = valueType;
       }
@@ -395,22 +401,22 @@ namespace Thrift.Protocol
       {
         if (writeKey)
         {
-          this.writer.WriteStartElement(name ?? "Key");
+          this.prot.writer.WriteStartElement(name ?? "Key");
         }
         else
         {
-          this.writer.WriteStartElement(name ?? "Value");
+          this.prot.writer.WriteStartElement(name ?? "Value");
         }
       }
 
       public void WriteValue(string value)
       {
-        this.writer.WriteElementString("Value", value);
+        this.prot.writer.WriteElementString("Value", value);
       }
 
       public void WriteEnd()
       {
-        this.writer.WriteEndElement();
+        this.prot.writer.WriteEndElement();
         writeKey = !writeKey;
       }
     }

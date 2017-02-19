@@ -63,7 +63,9 @@ namespace Thrift.Net
       TXmlProtocol prot = new TXmlProtocol(trans);
 
       Proto<T>.Write(prot, value);
-      return prot.ToString();
+      trans.Flush();
+      return Encoding.UTF8.GetString(trans.GetBuffer());
+      // return prot.ToString();
     }
 
     public static string GetJson(T value)
