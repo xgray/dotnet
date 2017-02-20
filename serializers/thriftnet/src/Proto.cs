@@ -61,6 +61,7 @@ namespace Thrift.Net
     {
       TMemoryBuffer trans = new TMemoryBuffer();
       TXmlProtocol prot = new TXmlProtocol(trans);
+      // TXDocProtocol prot = new TXDocProtocol(trans);
 
       Proto<T>.Write(prot, value);
       trans.Flush();

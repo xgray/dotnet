@@ -24,26 +24,29 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 using Bench;
 using Thrift.Transport;
 
 namespace Thrift.Protocol
 {
-  public class TXmlProtocol : TProtocol
+  public class TXDocProtocol : TProtocol
   {
-    private XmlWriter writer;
-    private XmlReader reader;
+    private XDocument doc;
+
+    private XElement element;
 
     private int writeDepth = 0;
 
     private Stack<IXmlContext> stack;
 
-    public TXmlProtocol(TTransport trans) : base(trans)
+    public TXDocProtocol(TTransport trans) : base(trans)
     {
       this.stack = new Stack<IXmlContext>();
-      this.stack.Push(new StructContext(this));
     }
 
     private IXmlContext Context
@@ -53,34 +56,23 @@ namespace Thrift.Protocol
 
     private void EnsureReader()
     {
-      if (this.reader == null)
+      if (this.doc == null)
       {
         Stream stream = new TTransportStream(trans);
 
-        XmlReaderSettings readerSettings = new XmlReaderSettings
-        {
-          IgnoreProcessingInstructions = true,
-          IgnoreWhitespace = true,
-          IgnoreComments = true,
-        };
-
-        this.reader = XmlReader.Create(stream, readerSettings);
+        this.doc = XDocument.Load(stream);
+        this.element = doc.Root;
+        this.stack.Push(new StructContext(this));
       }
     }
 
     private void EnsureWriter()
     {
-      if (this.writer == null)
+      if (this.doc == null)
       {
-        Stream stream = new TTransportStream(trans);
-        XmlWriterSettings writerSettings = new XmlWriterSettings
-        {
-          Indent = true,
-          IndentChars = "  ",
-          OmitXmlDeclaration = true,
-        };
-
-        this.writer = XmlWriter.Create(stream, writerSettings);
+        this.doc = XDocument.Parse("<root></root>");
+        this.element = doc.Root;
+        this.stack.Push(new StructContext(this));
       }
     }
 
@@ -90,8 +82,8 @@ namespace Thrift.Protocol
 
       this.writeDepth++;
       this.Context.WriteBegin(message.Name);
-      this.writer.WriteAttributeString("type", CommonUtils.ToString(message.Type));
-      this.writer.WriteAttributeString("seq", CommonUtils.ToString(message.SeqID));
+      this.element.Add(new XAttribute("type", CommonUtils.ToString(message.Type)));
+      this.element.Add(new XAttribute("seq", CommonUtils.ToString(message.SeqID)));
 
       this.stack.Push(new StructContext(this));
     }
@@ -100,9 +92,13 @@ namespace Thrift.Protocol
     {
       this.stack.Pop();
       this.Context.WriteEnd();
+
       if (this.stack.Count == 1)
       {
-        this.writer.Flush();
+        string xml = this.doc.Root.ToString();
+        byte[] buf = Encoding.UTF8.GetBytes(xml);
+        trans.Write(buf);
+        trans.Flush();
       }
     }
 
@@ -122,15 +118,18 @@ namespace Thrift.Protocol
 
       if (this.stack.Count == 1)
       {
-        this.writer.Flush();
+        string xml = this.doc.Root.Elements().First().ToString();
+        byte[] buf = Encoding.UTF8.GetBytes(xml);
+        trans.Write(buf);
+        trans.Flush();
       }
     }
 
     public override void WriteFieldBegin(TField field)
     {
       this.Context.WriteBegin(field.Name);
-      this.writer.WriteAttributeString("id", CommonUtils.ToString(field.ID));
-      this.writer.WriteAttributeString("type", CommonUtils.ToString(field.Type));
+      this.element.Add(new XAttribute("id", CommonUtils.ToString(field.ID)));
+      this.element.Add(new XAttribute("type", CommonUtils.ToString(field.Type)));
       this.stack.Push(new FieldContext(this));
     }
 
@@ -147,9 +146,9 @@ namespace Thrift.Protocol
     public override void WriteMapBegin(TMap map)
     {
       this.Context.WriteBegin(null);
-      this.writer.WriteAttributeString("key", CommonUtils.ToString(map.KeyType));
-      this.writer.WriteAttributeString("value", CommonUtils.ToString(map.ValueType));
-      this.writer.WriteAttributeString("count", CommonUtils.ToString(map.Count));
+      this.element.Add(new XAttribute("key", CommonUtils.ToString(map.KeyType)));
+      this.element.Add(new XAttribute("value", CommonUtils.ToString(map.ValueType)));
+      this.element.Add(new XAttribute("count", CommonUtils.ToString(map.Count)));
       this.stack.Push(new MapContext(this, map.KeyType, map.ValueType));
     }
 
@@ -162,8 +161,8 @@ namespace Thrift.Protocol
     public override void WriteListBegin(TList list)
     {
       this.Context.WriteBegin(null);
-      this.writer.WriteAttributeString("element", CommonUtils.ToString(list.ElementType));
-      this.writer.WriteAttributeString("count", CommonUtils.ToString(list.Count));
+      this.element.Add(new XAttribute("element", CommonUtils.ToString(list.ElementType)));
+      this.element.Add(new XAttribute("count", CommonUtils.ToString(list.Count)));
       this.stack.Push(new ListContext(this, list.ElementType));
     }
 
@@ -176,8 +175,8 @@ namespace Thrift.Protocol
     public override void WriteSetBegin(TSet set)
     {
       this.Context.WriteBegin(null);
-      this.writer.WriteAttributeString("element", CommonUtils.ToString(set.ElementType));
-      this.writer.WriteAttributeString("count", CommonUtils.ToString(set.Count));
+      this.element.Add(new XAttribute("element", CommonUtils.ToString(set.ElementType)));
+      this.element.Add(new XAttribute("count", CommonUtils.ToString(set.Count)));
       this.stack.Push(new ListContext(this, set.ElementType));
     }
 
@@ -233,10 +232,10 @@ namespace Thrift.Protocol
       this.Context.ReadBegin();
       this.stack.Push(new StructContext(this));
 
-      TMessageType type = CommonUtils.ToEnum<TMessageType>(this.reader.GetAttribute("type"));
-      int seq = CommonUtils.ToInt32(this.reader.GetAttribute("seq"));
+      TMessageType type = CommonUtils.ToEnum<TMessageType>(this.element.Attribute("type").Value);
+      int seq = CommonUtils.ToInt32(this.element.Attribute("seq").Value);
 
-      return new TMessage(this.reader.Name, type, seq);
+      return new TMessage(this.element.Name.LocalName, type, seq);
     }
 
     public override void ReadMessageEnd()
@@ -250,7 +249,7 @@ namespace Thrift.Protocol
       this.EnsureReader();
       this.Context.ReadBegin();
       this.stack.Push(new StructContext(this));
-      return new TStruct(this.reader.Name);
+      return new TStruct(this.element.Name.LocalName);
     }
 
     public override void ReadStructEnd()
@@ -262,17 +261,12 @@ namespace Thrift.Protocol
     public override TField ReadFieldBegin()
     {
       this.Context.ReadBegin();
-      if (this.reader.NodeType == XmlNodeType.EndElement)
-      {
-        return new TField("eof", TType.Stop, 0);
-      }
-
       this.stack.Push(new FieldContext(this));
 
-      TType type = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("type"));
-      short id = CommonUtils.ToInt16(this.reader.GetAttribute("id"));
+      TType type = CommonUtils.ToEnum<TType>(this.element.Attribute("type").Value);
+      short id = CommonUtils.ToInt16(this.element.Attribute("id").Value);
 
-      return new TField(this.reader.Name, type, id);
+      return new TField(this.element.Name.LocalName, type, id);
     }
 
     public override void ReadFieldEnd()
@@ -285,9 +279,9 @@ namespace Thrift.Protocol
     {
       this.Context.ReadBegin();
 
-      TType keyType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("key"));
-      TType valueType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("value"));
-      int count = CommonUtils.ToInt32(this.reader.GetAttribute("count"));
+      TType keyType = CommonUtils.ToEnum<TType>(this.element.Attribute("key").Value);
+      TType valueType = CommonUtils.ToEnum<TType>(this.element.Attribute("value").Value);
+      int count = CommonUtils.ToInt32(this.element.Attribute("count").Value);
 
       this.stack.Push(new MapContext(this, keyType, valueType));
       return new TMap(keyType, valueType, count);
@@ -303,8 +297,8 @@ namespace Thrift.Protocol
     {
       this.Context.ReadBegin();
 
-      TType elementType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("element"));
-      int count = CommonUtils.ToInt32(this.reader.GetAttribute("count"));
+      TType elementType = CommonUtils.ToEnum<TType>(this.element.Attribute("element").Value);
+      int count = CommonUtils.ToInt32(this.element.Attribute("count").Value);
 
       this.stack.Push(new ListContext(this, elementType));
       return new TList(elementType, count);
@@ -320,8 +314,8 @@ namespace Thrift.Protocol
     {
       this.Context.ReadBegin();
 
-      TType elementType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("element"));
-      int count = CommonUtils.ToInt32(this.reader.GetAttribute("count"));
+      TType elementType = CommonUtils.ToEnum<TType>(this.element.Attribute("element").Value);
+      int count = CommonUtils.ToInt32(this.element.Attribute("count").Value);
 
       this.stack.Push(new ListContext(this, elementType));
       return new TSet(elementType, count);
@@ -367,6 +361,7 @@ namespace Thrift.Protocol
     {
       return this.Context.ReadValue();
     }
+
     public override byte[] ReadBinary()
     {
       return CommonUtils.ToBytes(this.Context.ReadValue());
@@ -379,26 +374,31 @@ namespace Thrift.Protocol
       void WriteValue(string value);
 
       void ReadBegin();
-
       String ReadValue();
-
       void ReadEnd();
     }
 
     public class StructContext : IXmlContext
     {
-      private TXmlProtocol prot;
+      private TXDocProtocol prot;
 
-      private int saved = 0;
+      private int index = 0;
 
-      public StructContext(TXmlProtocol prot)
+      private XElement saved = null;
+      private XElement[] elements = null;
+
+      public StructContext(TXDocProtocol prot)
       {
         this.prot = prot;
+        this.saved = prot.element;
+        this.elements = prot.element.Elements().ToArray();
       }
 
       public void WriteBegin(string name)
       {
-        this.prot.writer.WriteStartElement(name);
+        XElement e = new XElement(name);
+        this.prot.element.Add(e);
+        this.prot.element = e;
       }
 
       public void WriteValue(string value)
@@ -408,13 +408,12 @@ namespace Thrift.Protocol
 
       public void WriteEnd()
       {
-        this.prot.writer.WriteEndElement();
+        this.prot.element = saved;
       }
 
       public void ReadBegin()
       {
-        this.prot.reader.Read();
-        this.saved = this.prot.reader.Depth;
+        this.prot.element = this.elements[index++];
       }
 
       public String ReadValue()
@@ -424,20 +423,21 @@ namespace Thrift.Protocol
 
       public void ReadEnd()
       {
-        while (this.prot.reader.Depth > saved)
-        {
-          this.prot.reader.Read();
-        }
+        this.prot.element = this.saved;
       }
     }
 
     public class FieldContext : IXmlContext
     {
-      private TXmlProtocol prot;
+      private TXDocProtocol prot;
+      private XElement saved = null;
+      private XElement[] elements = null;
 
-      public FieldContext(TXmlProtocol prot)
+      public FieldContext(TXDocProtocol prot)
       {
         this.prot = prot;
+        this.saved = prot.element;
+        this.elements = prot.element.Elements().ToArray();
       }
 
       public void WriteBegin(string name)
@@ -446,7 +446,7 @@ namespace Thrift.Protocol
 
       public void WriteValue(string value)
       {
-        this.prot.writer.WriteValue(value);
+        this.prot.element.Value = value;
       }
 
       public void WriteEnd()
@@ -459,8 +459,7 @@ namespace Thrift.Protocol
 
       public String ReadValue()
       {
-        this.prot.reader.Read();
-        return this.prot.reader.Value;
+        return prot.element.Value;
       }
 
       public void ReadEnd()
@@ -470,84 +469,85 @@ namespace Thrift.Protocol
 
     public class ListContext : IXmlContext
     {
-      private TXmlProtocol prot;
+      private TXDocProtocol prot;
       private TType elementType;
-      private int saved = 0;
+      private int index = 0;
+      private XElement saved = null;
+      private XElement[] elements = null;
 
-      public ListContext(TXmlProtocol prot, TType elementType)
+      public ListContext(TXDocProtocol prot, TType elementType)
       {
         this.prot = prot;
         this.elementType = elementType;
+        this.saved = prot.element;
+        this.elements = prot.element.Elements().ToArray();
       }
 
       public void WriteBegin(string name)
       {
-        this.prot.writer.WriteStartElement(name ?? "Item");
+        XElement e = new XElement(name ?? "Item");
+        this.prot.element.Add(e);
+        this.prot.element = e;
       }
 
       public void WriteValue(string value)
       {
-        this.prot.writer.WriteElementString("Item", value);
+        this.prot.element.Add(new XElement("Item", value));
       }
 
       public void WriteEnd()
       {
-        this.prot.writer.WriteEndElement();
+        this.prot.element = saved;
       }
 
       public void ReadBegin()
       {
-        this.prot.reader.Read();
-        this.saved = this.prot.reader.Depth;
+        this.prot.element = this.elements[index++];
       }
 
       public String ReadValue()
       {
-        try
-        {
-          this.prot.reader.Read();
-          this.prot.reader.Read();
-          return this.prot.reader.Value;
-        }
-        finally
-        {
-          this.prot.reader.Read();
-        }
+        return this.elements[index++].Value;
       }
 
       public void ReadEnd()
       {
-        while (this.prot.reader.Depth > saved)
-        {
-          this.prot.reader.Read();
-        }
+        this.prot.element = saved;
       }
     }
 
     public class MapContext : IXmlContext
     {
       private bool writeKey = true;
-      private TXmlProtocol prot;
+      private TXDocProtocol prot;
       private TType keyType;
       private TType valueType;
-      private int saved = 0;
+      private int index = 0;
+      private XElement saved = null;
+      private XElement[] elements = null;
 
-      public MapContext(TXmlProtocol prot, TType keyType, TType valueType)
+      public MapContext(TXDocProtocol prot, TType keyType, TType valueType)
       {
         this.prot = prot;
         this.keyType = keyType;
         this.valueType = valueType;
+        this.saved = prot.element;
+        this.elements = prot.element.Elements().ToArray();
       }
 
       public void WriteBegin(string name)
       {
         if (writeKey)
         {
-          this.prot.writer.WriteStartElement(name ?? "Key");
+          XElement e = new XElement(name ?? "Key");
+          this.prot.element.Add(e);
+          this.prot.element = e;
         }
         else
         {
-          this.prot.writer.WriteStartElement(name ?? "Value");
+          XElement e = new XElement(name ?? "Value");
+          this.prot.element.Add(e);
+          this.prot.element = e;
         }
       }
 
@@ -555,47 +555,34 @@ namespace Thrift.Protocol
       {
         if (writeKey)
         {
-          this.prot.writer.WriteElementString("Key", value);
+          this.prot.element.Add(new XElement("Key", value));
         }
         else
         {
-          this.prot.writer.WriteElementString("Value", value);
+          this.prot.element.Add(new XElement("Value", value));
         }
         writeKey = !writeKey;
       }
 
       public void WriteEnd()
       {
-        this.prot.writer.WriteEndElement();
+        this.prot.element = this.saved;
         writeKey = !writeKey;
       }
 
       public void ReadBegin()
       {
-        this.prot.reader.Read();
-        this.saved = this.prot.reader.Depth;
+        this.prot.element = this.elements[index++];
       }
 
       public String ReadValue()
       {
-        try
-        {
-          this.prot.reader.Read();
-          this.prot.reader.Read();
-          return this.prot.reader.Value;
-        }
-        finally
-        {
-          this.prot.reader.Read();
-        }
+        return this.elements[index++].Value;
       }
 
       public void ReadEnd()
       {
-        while (this.prot.reader.Depth > saved)
-        {
-          this.prot.reader.Read();
-        }
+        this.prot.element = saved;
       }
     }
   }

@@ -114,10 +114,10 @@ namespace thriftnet
       if (this.xml)
       {
         string xml1 = Proto<Complex>.GetXml(complexOutput);
+        WriteLine(xml1);
         complexOutput = Proto<Complex>.FromXml(xml1);
         string xml2 = Proto<Complex>.GetXml(complexOutput);
         CommonUtils.ThrowIfFalse(xml1 == xml2);
-        WriteLine(xml1);
       }
 
       WriteLine("simple:{0},{1},{2},{3}",
