@@ -40,8 +40,6 @@ namespace Thrift.Protocol
 
     private XElement element;
 
-    private int writeDepth = 0;
-
     private Stack<IXmlContext> stack;
 
     public TXDocProtocol(TTransport trans) : base(trans)
@@ -61,7 +59,7 @@ namespace Thrift.Protocol
         Stream stream = new TTransportStream(trans);
 
         this.doc = XDocument.Load(stream);
-        this.element = doc.Root;
+        this.element = new XElement("root", doc.Root);
         this.stack.Push(new StructContext(this));
       }
     }
@@ -80,7 +78,6 @@ namespace Thrift.Protocol
     {
       this.EnsureWriter();
 
-      this.writeDepth++;
       this.Context.WriteBegin(message.Name);
       this.element.Add(new XAttribute("type", CommonUtils.ToString(message.Type)));
       this.element.Add(new XAttribute("seq", CommonUtils.ToString(message.SeqID)));
@@ -106,7 +103,6 @@ namespace Thrift.Protocol
     {
       this.EnsureWriter();
 
-      this.writeDepth++;
       this.Context.WriteBegin(struc.Name);
       this.stack.Push(new StructContext(this));
     }
@@ -260,6 +256,15 @@ namespace Thrift.Protocol
 
     public override TField ReadFieldBegin()
     {
+      if( this.Context is StructContext)
+      {
+        StructContext sc = this.Context as StructContext;
+        if( sc.IsEnd )
+        {
+          return new TField("eof", TType.Stop, 0);
+        }
+      }
+
       this.Context.ReadBegin();
       this.stack.Push(new FieldContext(this));
 
@@ -392,6 +397,11 @@ namespace Thrift.Protocol
         this.prot = prot;
         this.saved = prot.element;
         this.elements = prot.element.Elements().ToArray();
+      }
+
+      public bool IsEnd
+      {
+        get { return this.index == this.elements.Length; }
       }
 
       public void WriteBegin(string name)

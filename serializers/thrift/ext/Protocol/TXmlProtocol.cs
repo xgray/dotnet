@@ -36,8 +36,6 @@ namespace Thrift.Protocol
     private XmlWriter writer;
     private XmlReader reader;
 
-    private int writeDepth = 0;
-
     private Stack<IXmlContext> stack;
 
     public TXmlProtocol(TTransport trans) : base(trans)
@@ -88,7 +86,6 @@ namespace Thrift.Protocol
     {
       this.EnsureWriter();
 
-      this.writeDepth++;
       this.Context.WriteBegin(message.Name);
       this.writer.WriteAttributeString("type", CommonUtils.ToString(message.Type));
       this.writer.WriteAttributeString("seq", CommonUtils.ToString(message.SeqID));
@@ -110,7 +107,6 @@ namespace Thrift.Protocol
     {
       this.EnsureWriter();
 
-      this.writeDepth++;
       this.Context.WriteBegin(struc.Name);
       this.stack.Push(new StructContext(this));
     }

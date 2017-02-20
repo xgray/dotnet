@@ -60,8 +60,8 @@ namespace Thrift.Net
     public static string GetXml(T value)
     {
       TMemoryBuffer trans = new TMemoryBuffer();
-      TXmlProtocol prot = new TXmlProtocol(trans);
-      // TXDocProtocol prot = new TXDocProtocol(trans);
+      // TXmlProtocol prot = new TXmlProtocol(trans);
+      TXDocProtocol prot = new TXDocProtocol(trans);
 
       Proto<T>.Write(prot, value);
       trans.Flush();
@@ -71,7 +71,8 @@ namespace Thrift.Net
     public static T FromXml(string xml)
     {
       TMemoryBuffer trans = new TMemoryBuffer(Encoding.UTF8.GetBytes(xml));
-      TProtocol prot = new TXmlProtocol(trans);
+      // TProtocol prot = new TXmlProtocol(trans);
+      TXDocProtocol prot = new TXDocProtocol(trans);
 
       return Proto<T>.Read(prot);
     }
