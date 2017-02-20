@@ -32,6 +32,9 @@ namespace thriftnet
     [CommandLineSwitchParameter]
     public bool full;
 
+    [CommandLineSwitchParameter]
+    public bool xml;
+
     private Simple simpleInput;
     private Simple simpleOutput;
 
@@ -58,6 +61,11 @@ namespace thriftnet
 
       if (full)
       {
+        complexInput.StringArray = Enumerable
+          .Range(0, this.simpleValue.Length)
+          .Select(i => this.simpleValue.Substring(i))
+          .ToArray();
+
         complexInput.SetValue = complexInput.ListValue.ToHashSet();
         complexInput.MapValue = new Dictionary<string, Simple>
         {
@@ -102,6 +110,15 @@ namespace thriftnet
       PrintBuf();
       trans.Seek(0, SeekOrigin.Begin);
       complexOutput = Proto<Complex>.Read(prot, complexOutput);
+
+      if (this.xml)
+      {
+        string xml1 = Proto<Complex>.GetXml(complexOutput);
+        complexOutput = Proto<Complex>.FromXml(xml1);
+        string xml2 = Proto<Complex>.GetXml(complexOutput);
+        CommonUtils.ThrowIfFalse(xml1 == xml2);
+        WriteLine(xml1);
+      }
 
       WriteLine("simple:{0},{1},{2},{3}",
         complexOutput.SimpleValue.Value,
@@ -158,7 +175,13 @@ namespace thriftnet
         }
       }
 
-      WriteLine(Proto<Complex>.GetXml(complexOutput));
+      if (complexOutput.StringArray != null)
+      {
+        for (int i = 0; i < complexOutput.StringArray.Length; i++)
+        {
+          WriteLine("strarr:{0}", complexOutput.StringArray[i]);
+        }
+      }
     }
 
     [Conditional("DEBUG")]
@@ -186,6 +209,7 @@ namespace thriftnet
 
     [ProtoColumn(4)]
     public long LongValue { get; set; }
+
   }
 
   [Proto]
@@ -205,5 +229,9 @@ namespace thriftnet
 
     [ProtoColumn(5)]
     public Simple[] ArrayValue { get; set; }
+
+    [ProtoColumn(6)]
+    public string[] StringArray { get; set; }
+
   }
 }

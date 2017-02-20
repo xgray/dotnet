@@ -65,7 +65,14 @@ namespace Thrift.Net
       Proto<T>.Write(prot, value);
       trans.Flush();
       return Encoding.UTF8.GetString(trans.GetBuffer());
-      // return prot.ToString();
+    }
+
+    public static T FromXml(string xml)
+    {
+      TMemoryBuffer trans = new TMemoryBuffer(Encoding.UTF8.GetBytes(xml));
+      TProtocol prot = new TXmlProtocol(trans);
+
+      return Proto<T>.Read(prot);
     }
 
     public static string GetJson(T value)

@@ -44,15 +44,22 @@ namespace Thrift.Protocol
     {
       Stream stream = new TTransportStream(trans);
 
-      XmlWriterSettings settings = new XmlWriterSettings
+      XmlWriterSettings writerSettings = new XmlWriterSettings
       {
         Indent = true,
         IndentChars = "  ",
         OmitXmlDeclaration = true,
       };
 
-      this.writer = XmlWriter.Create(stream, settings);
-      this.reader = XmlReader.Create(stream);
+      XmlReaderSettings readerSettings = new XmlReaderSettings
+      {
+        IgnoreProcessingInstructions = true,
+        IgnoreWhitespace = true,
+        IgnoreComments = true,
+      };
+
+      this.writer = XmlWriter.Create(stream, writerSettings);
+      this.reader = XmlReader.Create(stream, readerSettings);
 
       this.stack = new Stack<IXmlContext>();
       this.stack.Push(new StructContext(this));
@@ -67,6 +74,9 @@ namespace Thrift.Protocol
     {
       this.writeDepth++;
       this.Context.WriteBegin(message.Name);
+      this.writer.WriteAttributeString("type", CommonUtils.ToString(message.Type));
+      this.writer.WriteAttributeString("seq", CommonUtils.ToString(message.SeqID));
+
       this.stack.Push(new StructContext(this));
     }
 
@@ -74,16 +84,15 @@ namespace Thrift.Protocol
     {
       this.stack.Pop();
       this.Context.WriteEnd();
-      if( --this.writeDepth == 0)
+      if (--this.writeDepth == 0)
       {
-          this.writer.Flush();
+        this.writer.Flush();
       }
     }
 
     public override void WriteStructBegin(TStruct struc)
     {
       this.writeDepth++;
-      Console.WriteLine("WriteStructBegin");
       this.Context.WriteBegin(struc.Name);
       this.stack.Push(new StructContext(this));
     }
@@ -92,11 +101,10 @@ namespace Thrift.Protocol
     {
       this.stack.Pop();
       this.Context.WriteEnd();
-      Console.WriteLine(this.recursionDepth);
-      
-      if( --this.writeDepth == 0)
+
+      if (--this.writeDepth == 0)
       {
-          this.writer.Flush();
+        this.writer.Flush();
       }
     }
 
@@ -203,102 +211,145 @@ namespace Thrift.Protocol
 
     public override TMessage ReadMessageBegin()
     {
-      
-      throw new NotImplementedException();
+      this.Context.ReadBegin();
+      this.stack.Push(new StructContext(this));
+
+      TMessageType type = CommonUtils.ToEnum<TMessageType>(this.reader.GetAttribute("type"));
+      int seq = CommonUtils.ToInt32(this.reader.GetAttribute("seq"));
+
+      return new TMessage(this.reader.Name, type, seq);
     }
 
     public override void ReadMessageEnd()
     {
-      throw new NotImplementedException();
+      this.stack.Pop();
+      this.Context.ReadEnd();
     }
 
     public override TStruct ReadStructBegin()
     {
-      throw new NotImplementedException();
+      this.Context.ReadBegin();
+      this.stack.Push(new StructContext(this));
+      return new TStruct(this.reader.Name);
     }
 
     public override void ReadStructEnd()
     {
-      throw new NotImplementedException();
+      this.stack.Pop();
+      this.Context.ReadEnd();
     }
 
     public override TField ReadFieldBegin()
     {
-      throw new NotImplementedException();
+      this.Context.ReadBegin();
+      if (this.reader.NodeType == XmlNodeType.EndElement)
+      {
+        return new TField("eof", TType.Stop, 0);
+      }
+
+      this.stack.Push(new FieldContext(this));
+
+      TType type = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("type"));
+      short id = CommonUtils.ToInt16(this.reader.GetAttribute("id"));
+
+      return new TField(this.reader.Name, type, id);
     }
 
     public override void ReadFieldEnd()
     {
-      throw new NotImplementedException();
+      this.stack.Pop();
+      this.Context.ReadEnd();
     }
 
     public override TMap ReadMapBegin()
     {
-      throw new NotImplementedException();
+      this.Context.ReadBegin();
+
+      TType keyType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("key"));
+      TType valueType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("value"));
+      int count = CommonUtils.ToInt32(this.reader.GetAttribute("count"));
+
+      this.stack.Push(new MapContext(this, keyType, valueType));
+      return new TMap(keyType, valueType, count);
     }
 
     public override void ReadMapEnd()
     {
-      throw new NotImplementedException();
+      this.stack.Pop();
+      this.Context.ReadEnd();
     }
 
     public override TList ReadListBegin()
     {
-      throw new NotImplementedException();
+      this.Context.ReadBegin();
+
+      TType elementType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("element"));
+      int count = CommonUtils.ToInt32(this.reader.GetAttribute("count"));
+
+      this.stack.Push(new ListContext(this, elementType));
+      return new TList(elementType, count);
     }
 
     public override void ReadListEnd()
     {
-      throw new NotImplementedException();
+      this.stack.Pop();
+      this.Context.ReadEnd();
     }
 
     public override TSet ReadSetBegin()
     {
-      throw new NotImplementedException();
+      this.Context.ReadBegin();
+
+      TType elementType = CommonUtils.ToEnum<TType>(this.reader.GetAttribute("element"));
+      int count = CommonUtils.ToInt32(this.reader.GetAttribute("count"));
+
+      this.stack.Push(new ListContext(this, elementType));
+      return new TSet(elementType, count);
     }
 
     public override void ReadSetEnd()
     {
-      throw new NotImplementedException();
+      this.stack.Pop();
+      this.Context.ReadEnd();
     }
 
     public override bool ReadBool()
     {
-      return CommonUtils.ToBoolean(this.reader.ReadContentAsString());
+      return CommonUtils.ToBoolean(this.Context.ReadValue());
     }
 
     public override sbyte ReadByte()
     {
-      return (sbyte)CommonUtils.ToByte(this.reader.ReadContentAsString());
+      return (sbyte)CommonUtils.ToByte(this.Context.ReadValue());
     }
 
     public override short ReadI16()
     {
-      return CommonUtils.ToInt16(this.reader.ReadContentAsString());
+      return CommonUtils.ToInt16(this.Context.ReadValue());
     }
 
     public override int ReadI32()
     {
-      return CommonUtils.ToInt32(this.reader.ReadContentAsString());
+      return CommonUtils.ToInt32(this.Context.ReadValue());
     }
 
     public override long ReadI64()
     {
-      return CommonUtils.ToInt64(this.reader.ReadContentAsString());
+      return CommonUtils.ToInt64(this.Context.ReadValue());
     }
 
     public override double ReadDouble()
     {
-      return CommonUtils.ToDouble(this.reader.ReadContentAsString());
+      return CommonUtils.ToDouble(this.Context.ReadValue());
     }
 
     public override string ReadString()
     {
-      return this.reader.ReadContentAsString();
+      return this.Context.ReadValue();
     }
     public override byte[] ReadBinary()
     {
-      return CommonUtils.ToBytes(this.reader.ReadContentAsString());
+      return CommonUtils.ToBytes(this.Context.ReadValue());
     }
 
     public interface IXmlContext
@@ -306,11 +357,19 @@ namespace Thrift.Protocol
       void WriteBegin(string name);
       void WriteEnd();
       void WriteValue(string value);
+
+      void ReadBegin();
+
+      String ReadValue();
+
+      void ReadEnd();
     }
 
     public class StructContext : IXmlContext
     {
       private TXmlProtocol prot;
+
+      private int saved = 0;
 
       public StructContext(TXmlProtocol prot)
       {
@@ -330,6 +389,25 @@ namespace Thrift.Protocol
       public void WriteEnd()
       {
         this.prot.writer.WriteEndElement();
+      }
+
+      public void ReadBegin()
+      {
+        this.prot.reader.Read();
+        this.saved = this.prot.reader.Depth;
+      }
+
+      public String ReadValue()
+      {
+        throw new NotImplementedException();
+      }
+
+      public void ReadEnd()
+      {
+        while (this.prot.reader.Depth > saved)
+        {
+          this.prot.reader.Read();
+        }
       }
     }
 
@@ -354,12 +432,27 @@ namespace Thrift.Protocol
       public void WriteEnd()
       {
       }
+
+      public void ReadBegin()
+      {
+      }
+
+      public String ReadValue()
+      {
+        this.prot.reader.Read();
+        return this.prot.reader.Value;
+      }
+
+      public void ReadEnd()
+      {
+      }
     }
 
     public class ListContext : IXmlContext
     {
       private TXmlProtocol prot;
       private TType elementType;
+      private int saved = 0;
 
       public ListContext(TXmlProtocol prot, TType elementType)
       {
@@ -381,6 +474,34 @@ namespace Thrift.Protocol
       {
         this.prot.writer.WriteEndElement();
       }
+
+      public void ReadBegin()
+      {
+        this.prot.reader.Read();
+        this.saved = this.prot.reader.Depth;
+      }
+
+      public String ReadValue()
+      {
+        try
+        {
+          this.prot.reader.Read();
+          this.prot.reader.Read();
+          return this.prot.reader.Value;
+        }
+        finally
+        {
+          this.prot.reader.Read();
+        }
+      }
+
+      public void ReadEnd()
+      {
+        while (this.prot.reader.Depth > saved)
+        {
+          this.prot.reader.Read();
+        }
+      }
     }
 
     public class MapContext : IXmlContext
@@ -389,6 +510,7 @@ namespace Thrift.Protocol
       private TXmlProtocol prot;
       private TType keyType;
       private TType valueType;
+      private int saved = 0;
 
       public MapContext(TXmlProtocol prot, TType keyType, TType valueType)
       {
@@ -418,6 +540,34 @@ namespace Thrift.Protocol
       {
         this.prot.writer.WriteEndElement();
         writeKey = !writeKey;
+      }
+
+      public void ReadBegin()
+      {
+        this.prot.reader.Read();
+        this.saved = this.prot.reader.Depth;
+      }
+
+      public String ReadValue()
+      {
+        try
+        {
+          this.prot.reader.Read();
+          this.prot.reader.Read();
+          return this.prot.reader.Value;
+        }
+        finally
+        {
+          this.prot.reader.Read();
+        }        
+      }
+
+      public void ReadEnd()
+      {
+        while (this.prot.reader.Depth > saved)
+        {
+          this.prot.reader.Read();
+        }
       }
     }
   }
