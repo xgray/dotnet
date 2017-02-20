@@ -19,8 +19,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using Thrift.Protocol;
 
 namespace Thrift.Transport
 {

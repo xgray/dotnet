@@ -44,25 +44,7 @@ namespace Thrift.Protocol
 
     public TXmlProtocol(TTransport trans) : base(trans)
     {
-      Stream stream = new TTransportStream(trans);
-
-      XmlWriterSettings writerSettings = new XmlWriterSettings
-      {
-        Indent = true,
-        IndentChars = "  ",
-        OmitXmlDeclaration = true,
-      };
-
-      XmlReaderSettings readerSettings = new XmlReaderSettings
-      {
-        IgnoreProcessingInstructions = true,
-        IgnoreWhitespace = true,
-        IgnoreComments = true,
-      };
-
-      this.writer = XmlWriter.Create(stream, writerSettings);
-      this.reader = XmlReader.Create(stream, readerSettings);
-
+      this.trans = trans;
       this.stack = new Stack<IXmlContext>();
       this.stack.Push(new StructContext(this));
     }
