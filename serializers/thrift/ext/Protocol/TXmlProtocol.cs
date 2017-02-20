@@ -33,6 +33,8 @@ namespace Thrift.Protocol
 {
   public class TXmlProtocol : TProtocol
   {
+    private TTransport trans;
+
     private XmlWriter writer;
     private XmlReader reader;
 
@@ -70,8 +72,43 @@ namespace Thrift.Protocol
       get { return this.stack.Peek(); }
     }
 
+    private void EnsureReader()
+    {
+      if (this.reader == null)
+      {
+        Stream stream = new TTransportStream(trans);
+
+        XmlReaderSettings readerSettings = new XmlReaderSettings
+        {
+          IgnoreProcessingInstructions = true,
+          IgnoreWhitespace = true,
+          IgnoreComments = true,
+        };
+
+        this.reader = XmlReader.Create(stream, readerSettings);
+      }
+    }
+
+    private void EnsureWriter()
+    {
+      if (this.writer == null)
+      {
+        Stream stream = new TTransportStream(trans);
+        XmlWriterSettings writerSettings = new XmlWriterSettings
+        {
+          Indent = true,
+          IndentChars = "  ",
+          OmitXmlDeclaration = true,
+        };
+
+        this.writer = XmlWriter.Create(stream, writerSettings);
+      }
+    }
+
     public override void WriteMessageBegin(TMessage message)
     {
+      this.EnsureWriter();
+
       this.writeDepth++;
       this.Context.WriteBegin(message.Name);
       this.writer.WriteAttributeString("type", CommonUtils.ToString(message.Type));
@@ -92,6 +129,8 @@ namespace Thrift.Protocol
 
     public override void WriteStructBegin(TStruct struc)
     {
+      this.EnsureWriter();
+
       this.writeDepth++;
       this.Context.WriteBegin(struc.Name);
       this.stack.Push(new StructContext(this));
@@ -211,6 +250,7 @@ namespace Thrift.Protocol
 
     public override TMessage ReadMessageBegin()
     {
+      this.EnsureReader();
       this.Context.ReadBegin();
       this.stack.Push(new StructContext(this));
 
@@ -228,6 +268,7 @@ namespace Thrift.Protocol
 
     public override TStruct ReadStructBegin()
     {
+      this.EnsureReader();
       this.Context.ReadBegin();
       this.stack.Push(new StructContext(this));
       return new TStruct(this.reader.Name);
@@ -462,12 +503,12 @@ namespace Thrift.Protocol
 
       public void WriteBegin(string name)
       {
-        this.prot.writer.WriteStartElement(name ?? "Value");
+        this.prot.writer.WriteStartElement(name ?? "Item");
       }
 
       public void WriteValue(string value)
       {
-        this.prot.writer.WriteElementString("Value", value);
+        this.prot.writer.WriteElementString("Item", value);
       }
 
       public void WriteEnd()
@@ -559,7 +600,7 @@ namespace Thrift.Protocol
         finally
         {
           this.prot.reader.Read();
-        }        
+        }
       }
 
       public void ReadEnd()
