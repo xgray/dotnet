@@ -4,6 +4,7 @@ namespace Thrift.Net
   using System;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml.Linq;
 
   using Bench;
 
@@ -44,6 +45,15 @@ namespace Thrift.Net
     public void Write(TProtocol oprot, DateTime value)
     {
       oprot.WriteI64(value.ToUniversalTime().Ticks);
+    }
+
+    public DateTime Read(XElement xe)
+    {
+      return CommonUtils.ToDateTime(xe.Value);
+    }
+    public void Write(XElement xe, DateTime value)
+    {
+      xe.Value = CommonUtils.ToString(value);
     }
   }
 }

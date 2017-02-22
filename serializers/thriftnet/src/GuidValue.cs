@@ -4,6 +4,7 @@ namespace Thrift.Net
   using System;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml.Linq;
 
   using Bench;
 
@@ -41,6 +42,16 @@ namespace Thrift.Net
     public void Write(TProtocol oprot, Guid value)
     {
       oprot.WriteBinary(value.ToByteArray());
+    }
+
+    public Guid Read(XElement xe)
+    {
+      return Guid.Parse(xe.Value);
+    }
+
+    public void Write(XElement xe, Guid value)
+    {
+      xe.Value = value.ToString("N");
     }
   }
 }

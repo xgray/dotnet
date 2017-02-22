@@ -5,6 +5,7 @@ namespace Thrift.Net
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml.Linq;
 
   using Bench;
   using Thrift.Protocol;
@@ -132,6 +133,26 @@ namespace Thrift.Net
         this.ValueMetadata.Write(oprot, item);
       }
       oprot.WriteSetEnd();
+    }
+
+    public HashSet<V> Read(XElement xe)
+    {
+      HashSet<V> set = new HashSet<V>();
+      foreach(XElement ce in xe.Elements())
+      {
+        set.Add(this.ValueMetadata.Read(ce));
+      }
+      return set;
+    }
+
+    public void Write(XElement xe, HashSet<V> value)
+    {
+      foreach(V item in value)
+      {
+        XElement ce = new XElement("Item");
+        this.ValueMetadata.Write(ce, item);
+        xe.Add(ce);
+      }
     }
   }
 }

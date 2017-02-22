@@ -1,10 +1,10 @@
 ﻿
 namespace Thrift.Net
 {
-  using System;
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml.Linq;
 
   using Bench;
   using Thrift.Protocol;
@@ -158,6 +158,43 @@ namespace Thrift.Net
         this.ValueMetadata.Write(oprot, value[k]);
       }
       oprot.WriteMapEnd();
+    }
+
+    public Dictionary<K, V> Read(XElement xe)
+    {
+      Dictionary<K, V> dict = new Dictionary<K, V>();
+      bool isKey = true;
+
+      K key = default(K);
+      V value = default(V);
+
+      foreach(XElement ce in xe.Elements())
+      {
+        if( isKey)
+        {
+          key = this.KeyMetadata.Read(ce);
+        }
+        else
+        {
+          value = this.ValueMetadata.Read(ce);
+          dict.Add(key, value);
+        }
+        isKey = !isKey;
+      }
+      return dict;
+    }
+
+    public void Write(XElement xe, Dictionary<K, V> value)
+    {
+      foreach(K key in value.Keys)
+      {
+        XElement ke = new XElement("Key");
+        this.KeyMetadata.Write(ke, key);
+        xe.Add(ke);
+        XElement ve = new XElement("Value");
+        this.ValueMetadata.Write(ve, value[key]);
+        xe.Add(ve);
+      }
     }
   }
 }

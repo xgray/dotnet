@@ -3,6 +3,7 @@ namespace Thrift.Net
 {
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml.Linq;
   
   using Bench;
 
@@ -40,6 +41,15 @@ namespace Thrift.Net
     public void Write(TProtocol oprot, ulong value)
     {
       oprot.WriteI64((long)value);
+    }
+
+    public ulong Read(XElement xe)
+    {
+      return CommonUtils.ToUInt64(xe.Value);
+    }
+    public void Write(XElement xe, ulong value)
+    {
+      xe.Value = CommonUtils.ToString(value);
     }
   }
 }

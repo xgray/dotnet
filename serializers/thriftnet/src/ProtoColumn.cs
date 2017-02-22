@@ -5,6 +5,7 @@ namespace Thrift.Net
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml.Linq;
 
   using Thrift.Protocol;
 
@@ -23,10 +24,11 @@ namespace Thrift.Net
 
   public interface IProtoValue<V> : IProtoValue
   {
-
     V Read(TProtocol iprot);
-
     void Write(TProtocol oprot, V value);
+
+    V Read(XElement xe);
+    void Write(XElement xe, V value);
   }
   public interface IProtoColumn<T>
   {
@@ -45,6 +47,10 @@ namespace Thrift.Net
     void Read(TProtocol iprot, T proto);
 
     void Write(TProtocol oprot, T proto);
+
+    void Read(XElement iprot, T proto);
+
+    void Write(XElement oprot, T proto);
   }
 
   /// <summary>
@@ -107,6 +113,11 @@ namespace Thrift.Net
 
     public Action<T, V> Setter { get; private set; }
 
+    public bool IsDefault(V value)
+    {
+      return EqualityComparer<V>.Default.Equals(value, this.Default);
+    }
+
     /// <summary>
     /// Read column value from a thrift protocol
     /// </summary>
@@ -126,7 +137,7 @@ namespace Thrift.Net
     public void Write(TProtocol oprot, T proto)
     {
       V value = this.Getter(proto);
-      if (!EqualityComparer<V>.Default.Equals(value, this.Default))
+      if (!this.IsDefault(value))
       {
         TField field = new TField();
         field.ID = this.ID;
@@ -135,6 +146,21 @@ namespace Thrift.Net
         oprot.WriteFieldBegin(field);
         this.ValueMetadata.Write(oprot, value);
         oprot.WriteFieldEnd();
+      }
+    }
+
+    public void Read(XElement xe, T proto)
+    {
+      V value = this.ValueMetadata.Read(xe);
+      this.Setter(proto, value);      
+    }
+
+    public void Write(XElement xe, T proto)
+    {
+      V value = this.Getter(proto);
+      if (!this.IsDefault(value))
+      {
+        this.ValueMetadata.Write(xe, value);
       }
     }
   }

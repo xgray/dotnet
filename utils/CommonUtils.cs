@@ -982,6 +982,28 @@ namespace Bench
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
+        public static string ToString(ushort value)
+        {
+            return value.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static ushort ToUInt16(string str)
+        {
+            ushort shortValue = default(ushort);
+            ushort.TryParse(str, out shortValue);
+            return shortValue;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string ToString(int value)
         {
             return value.ToString();
@@ -1004,6 +1026,28 @@ namespace Bench
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
+        public static string ToString(uint value)
+        {
+            return value.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static uint ToUInt32(string str)
+        {
+            uint intValue = default(uint);
+            uint.TryParse(str, out intValue);
+            return intValue;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string ToString(long value)
         {
             return value.ToString();
@@ -1018,6 +1062,28 @@ namespace Bench
         {
             long longValue = default(long);
             long.TryParse(str, out longValue);
+            return longValue;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string ToString(ulong value)
+        {
+            return value.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static ulong ToUInt64(string str)
+        {
+            ulong longValue = default(ulong);
+            ulong.TryParse(str, out longValue);
             return longValue;
         }
 

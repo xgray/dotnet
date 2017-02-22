@@ -3,7 +3,8 @@ namespace Thrift.Net
 {
   using System.Linq.Expressions;
   using System.Reflection;
-  
+  using System.Xml.Linq;
+
   using Bench;
 
   using Thrift.Protocol;
@@ -11,7 +12,7 @@ namespace Thrift.Net
   /// <summary>
   /// BooleanColumn Type
   /// </summary>
-  public class BooleanValue : IProtoValue<bool>  
+  public class BooleanValue : IProtoValue<bool>
   {
     public TType Type
     {
@@ -20,7 +21,7 @@ namespace Thrift.Net
 
     public Expression Read(Expression iprot)
     {
-      return Expression.Call(iprot,typeof(TProtocol).GetMethod("ReadBool"));
+      return Expression.Call(iprot, typeof(TProtocol).GetMethod("ReadBool"));
     }
 
     public Expression Write(Expression oprot, Expression value)
@@ -37,6 +38,16 @@ namespace Thrift.Net
     public void Write(TProtocol oprot, bool value)
     {
       oprot.WriteBool(value);
+    }
+
+    public bool Read(XElement xe)
+    {
+      return CommonUtils.ToBoolean(xe.Value);
+    }
+
+    public void Write(XElement xe, bool value)
+    {
+      xe.Value = CommonUtils.ToString(value);
     }
   }
 }

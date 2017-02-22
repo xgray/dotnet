@@ -3,10 +3,12 @@ namespace Thrift.Net
 {
   using System;
   using System.Collections.Generic;
+  using System.IO;
   using System.Linq;
   using System.Linq.Expressions;
   using System.Reflection;
   using System.Text;
+  using System.Xml.Linq;
 
   using Bench;
 
@@ -23,7 +25,7 @@ namespace Thrift.Net
 
     private IProtoColumn<T>[] columns;
 
-    private IDictionary<string, IProtoValue> metadata;
+    private IDictionary<string, IProtoColumn<T>> metadata;
 
     private Action<TProtocol, T> reader;
 
@@ -35,14 +37,7 @@ namespace Thrift.Net
     private Proto(IProtoColumn<T>[] columns)
     {
       this.columns = columns;
-      this.metadata = columns
-        .Where( c => c != null)
-        .ToDictionary(c => c.Name, c => (IProtoValue)c.Value);
-    }
-
-    public static IDictionary<string, IProtoValue> Metadata
-    {
-      get { return instance.Value.metadata; }
+      this.metadata = columns.Where(c => c != null).ToDictionary(c => c.Name);
     }
 
     public static void Validate()
@@ -50,25 +45,68 @@ namespace Thrift.Net
       System.Diagnostics.Debug.Assert(instance.Value != null);
     }
 
-    public static string GetXml(T value)
+    public static T Read(XElement xe)
     {
-      TMemoryBuffer trans = new TMemoryBuffer();
-      // TXmlProtocol prot = new TXmlProtocol(trans);
-      TXDocProtocol prot = new TXDocProtocol(trans);
+      T proto = new T();
+      IDictionary<string, IProtoColumn<T>> metadata = instance.Value.metadata;
+      foreach (XElement ce in xe.Elements())
+      {
+        IProtoColumn<T> column;
+        if (metadata.TryGetValue(ce.Name.LocalName, out column))
+        {
+          column.Read(ce, proto);
+        }
+      }
+      return proto;
+    }
 
-      Proto<T>.Write(prot, value);
-      trans.Flush();
-      return Encoding.UTF8.GetString(trans.GetBuffer());
+    public static void Write(XElement xe, T proto)
+    {
+      IProtoColumn<T>[] columns = instance.Value.columns;
+      for (int index = 0; index < columns.Length; index++)
+      {
+        IProtoColumn<T> column = columns[index];
+        if (column != null)
+        {
+          XElement fe = new XElement(column.Name);
+          column.Write(fe, proto);
+          xe.Add(fe);
+        }
+      }
+    }
+
+    public static string GetXml(T proto)
+    {
+      XElement xe = new XElement(typeof(T).Name);
+      Proto<T>.Write(xe, proto);
+      return xe.ToString();
     }
 
     public static T FromXml(string xml)
     {
-      TMemoryBuffer trans = new TMemoryBuffer(Encoding.UTF8.GetBytes(xml));
-      // TProtocol prot = new TXmlProtocol(trans);
-      TXDocProtocol prot = new TXDocProtocol(trans);
-
-      return Proto<T>.Read(prot);
+      XElement xe = XElement.Load(new StringReader(xml));
+      return Proto<T>.Read(xe);
     }
+
+    // public static string GetXml(T value)
+    // {
+    //   TMemoryBuffer trans = new TMemoryBuffer();
+    //   // TXmlProtocol prot = new TXmlProtocol(trans);
+    //   TXDocProtocol prot = new TXDocProtocol(trans);
+
+    //   Proto<T>.Write(prot, value);
+    //   trans.Flush();
+    //   return Encoding.UTF8.GetString(trans.GetBuffer());
+    // }
+
+    // public static T FromXml(string xml)
+    // {
+    //   TMemoryBuffer trans = new TMemoryBuffer(Encoding.UTF8.GetBytes(xml));
+    //   // TProtocol prot = new TXmlProtocol(trans);
+    //   TXDocProtocol prot = new TXDocProtocol(trans);
+
+    //   return Proto<T>.Read(prot);
+    // }
 
     public static string GetJson(T value)
     {
