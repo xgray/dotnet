@@ -23,6 +23,8 @@ namespace Thrift.Net
 
     private IProtoColumn<T>[] columns;
 
+    private IDictionary<string, IProtoValue> metadata;
+
     private Action<TProtocol, T> reader;
 
     private Action<TProtocol, T> writer;
@@ -33,29 +35,20 @@ namespace Thrift.Net
     private Proto(IProtoColumn<T>[] columns)
     {
       this.columns = columns;
+      this.metadata = columns
+        .Where( c => c != null)
+        .ToDictionary(c => c.Name, c => (IProtoValue)c.Value);
     }
 
-    public static IProtoColumn<T>[] Columns
+    public static IDictionary<string, IProtoValue> Metadata
     {
-      get { return instance.Value.columns; }
+      get { return instance.Value.metadata; }
     }
 
     public static void Validate()
     {
       System.Diagnostics.Debug.Assert(instance.Value != null);
     }
-
-    // public static IProtoColumn<T> GetColumn(int id)
-    // {
-    //   if (id < Proto<T>.Columns.Length)
-    //   {
-    //     return Proto<T>.Columns[id];
-    //   }
-    //   else
-    //   {
-    //     return null;
-    //   }
-    // }
 
     public static string GetXml(T value)
     {

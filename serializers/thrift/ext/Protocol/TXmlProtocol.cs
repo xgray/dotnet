@@ -41,7 +41,6 @@ namespace Thrift.Protocol
     public TXmlProtocol(TTransport trans) : base(trans)
     {
       this.stack = new Stack<IXmlContext>();
-      this.stack.Push(new StructContext(this));
     }
 
     private IXmlContext Context
@@ -63,6 +62,7 @@ namespace Thrift.Protocol
         };
 
         this.reader = XmlReader.Create(stream, readerSettings);
+        this.stack.Push(new StructContext(this));
       }
     }
 
@@ -79,6 +79,7 @@ namespace Thrift.Protocol
         };
 
         this.writer = XmlWriter.Create(stream, writerSettings);
+        this.stack.Push(new StructContext(this));
       }
     }
 
