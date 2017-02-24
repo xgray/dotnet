@@ -3,6 +3,7 @@ namespace Thrift.Net
 {
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
   
   using Bench;
@@ -48,5 +49,16 @@ namespace Thrift.Net
     {
       xe.Value = CommonUtils.ToString(value);
     }
+
+    public double Read(XmlReader reader)
+    {
+      return CommonUtils.ToDouble(reader.ReadElementString());
+    }
+
+    public void Write(XmlWriter writer, double value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
+    
   }
 }

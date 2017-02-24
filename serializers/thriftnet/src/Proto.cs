@@ -8,6 +8,7 @@ namespace Thrift.Net
   using System.Linq.Expressions;
   using System.Reflection;
   using System.Text;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Bench;
@@ -68,62 +69,98 @@ namespace Thrift.Net
         IProtoColumn<T> column = columns[index];
         if (column != null)
         {
-          XElement fe = new XElement(column.Name);
-          column.Write(fe, proto);
-          xe.Add(fe);
+          column.Write(xe, proto);
+        }
+      }
+    }
+
+    public static T Read(XmlReader reader)
+    {
+      T proto = new T();
+      IDictionary<string, IProtoColumn<T>> metadata = instance.Value.metadata;
+
+      if (reader.IsEmptyElement)
+      {
+        return proto;
+      }
+
+      int saved = reader.Depth;
+      reader.Read();
+      while (reader.Depth > saved)
+      {
+        IProtoColumn<T> column;
+        if (metadata.TryGetValue(reader.Name, out column))
+        {
+          column.Read(reader, proto);
+          reader.Read();
+        }
+        else
+        {
+          reader.Skip();
+        }
+      }
+
+      return proto;
+    }
+
+    public static void Write(XmlWriter writer, T proto)
+    {
+      IProtoColumn<T>[] columns = instance.Value.columns;
+      for (int index = 0; index < columns.Length; index++)
+      {
+        IProtoColumn<T> column = columns[index];
+        if (column != null)
+        {
+          column.Write(writer, proto);
         }
       }
     }
 
     public static string GetXml(T proto)
     {
+      XmlWriterSettings writerSettings = new XmlWriterSettings
+      {
+        Indent = true,
+        IndentChars = "  ",
+        OmitXmlDeclaration = true,
+      };
+
+      MemoryStream stream = new MemoryStream();
+      XmlWriter writer = XmlWriter.Create(stream, writerSettings);
+      writer.WriteStartElement(typeof(T).Name);
+      Proto<T>.Write(writer, proto);
+      writer.WriteEndElement();
+      writer.Flush();
+      return Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    public static T FromXml(string xml)
+    {
+      XmlReaderSettings readerSettings = new XmlReaderSettings
+      {
+        IgnoreProcessingInstructions = true,
+        IgnoreWhitespace = true,
+        IgnoreComments = true,
+      };
+
+      MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
+      XmlReader reader = XmlReader.Create(stream, readerSettings);
+      reader.Read();
+
+      return Proto<T>.Read(reader);
+    }
+
+    public static string GetXml2(T proto)
+    {
       XElement xe = new XElement(typeof(T).Name);
       Proto<T>.Write(xe, proto);
       return xe.ToString();
     }
 
-    public static T FromXml(string xml)
+    public static T FromXml2(string xml)
     {
       XElement xe = XElement.Load(new StringReader(xml));
       return Proto<T>.Read(xe);
-    }
-
-    // public static string GetXml(T value)
-    // {
-    //   TMemoryBuffer trans = new TMemoryBuffer();
-    //   // TXmlProtocol prot = new TXmlProtocol(trans);
-    //   TXDocProtocol prot = new TXDocProtocol(trans);
-
-    //   Proto<T>.Write(prot, value);
-    //   trans.Flush();
-    //   return Encoding.UTF8.GetString(trans.GetBuffer());
-    // }
-
-    // public static T FromXml(string xml)
-    // {
-    //   TMemoryBuffer trans = new TMemoryBuffer(Encoding.UTF8.GetBytes(xml));
-    //   // TProtocol prot = new TXmlProtocol(trans);
-    //   TXDocProtocol prot = new TXDocProtocol(trans);
-
-    //   return Proto<T>.Read(prot);
-    // }
-
-    public static string GetJson(T value)
-    {
-      TMemoryBuffer trans = new TMemoryBuffer();
-      TProtocol prot = new TSimpleJSONProtocol(trans);
-
-      Proto<T>.Write(prot, value);
-      byte[] buffer = trans.GetBuffer();
-      return Encoding.UTF8.GetString(buffer);
-    }
-
-    public static T FromJson(string json)
-    {
-      TMemoryBuffer trans = new TMemoryBuffer(Encoding.UTF8.GetBytes(json));
-      TProtocol prot = new TSimpleJSONProtocol(trans);
-
-      return Proto<T>.Read(prot);
     }
 
     public static T Read(TProtocol iprot)
@@ -186,17 +223,12 @@ namespace Thrift.Net
       {
         TStruct struc = new TStruct(typeof(T).Name);
         oprot.WriteStructBegin(struc);
-        // TField field = new TField();
         for (int index = 0; index < columns.Length; index++)
         {
           IProtoColumn<T> column = columns[index];
           if (column != null)
           {
-            // field.ID = column.ID;
-            // field.Type = column.Type;
-            // oprot.WriteFieldBegin(field);
             column.Write(oprot, value);
-            // oprot.WriteFieldEnd();
           }
         }
         oprot.WriteFieldStop();

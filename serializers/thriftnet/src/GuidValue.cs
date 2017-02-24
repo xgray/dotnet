@@ -4,6 +4,7 @@ namespace Thrift.Net
   using System;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Bench;
@@ -52,6 +53,16 @@ namespace Thrift.Net
     public void Write(XElement xe, Guid value)
     {
       xe.Value = value.ToString("N");
+    }
+
+    public Guid Read(XmlReader reader)
+    {
+      return Guid.Parse(reader.ReadElementString());
+    }
+
+    public void Write(XmlWriter writer, Guid value)
+    {
+      writer.WriteValue(value.ToString("N"));
     }
   }
 }

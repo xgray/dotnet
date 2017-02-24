@@ -5,6 +5,7 @@ namespace Thrift.Net
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Bench;
@@ -103,7 +104,7 @@ namespace Thrift.Net
             ),
             this.ValueMetadata.Write(
               oprot,
-              Expression.MakeIndex(value, typeof(List<V>).GetProperty("Item"), new [] {i} )
+              Expression.MakeIndex(value, typeof(List<V>).GetProperty("Item"), new[] { i })
             ),
             Expression.AddAssign(i, Expression.Constant(1))
           )
@@ -140,7 +141,7 @@ namespace Thrift.Net
     public List<V> Read(XElement xe)
     {
       List<V> list = new List<V>();
-      foreach(XElement ce in xe.Elements())
+      foreach (XElement ce in xe.Elements())
       {
         list.Add(this.ValueMetadata.Read(ce));
       }
@@ -149,11 +150,35 @@ namespace Thrift.Net
 
     public void Write(XElement xe, List<V> value)
     {
-      for( int i = 0; i < value.Count; i++)
+      for (int i = 0; i < value.Count; i++)
       {
         XElement ce = new XElement("Item");
         this.ValueMetadata.Write(ce, value[i]);
         xe.Add(ce);
+      }
+    }
+
+    public List<V> Read(XmlReader reader)
+    {
+      List<V> list = new List<V>();
+      if (!reader.IsEmptyElement)
+      {
+        int saved = reader.Depth;
+        while (reader.Read() && reader.Depth > saved)
+        {
+          list.Add(this.ValueMetadata.Read(reader));
+        }
+      }
+      return list;
+    }
+
+    public void Write(XmlWriter writer, List<V> value)
+    {
+      for (int i = 0; i < value.Count; i++)
+      {
+        writer.WriteStartElement("Item");
+        this.ValueMetadata.Write(writer, value[i]);
+        writer.WriteEndElement();
       }
     }
   }

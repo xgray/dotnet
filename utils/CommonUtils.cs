@@ -24,7 +24,7 @@ namespace Bench
         /// <summary>
         /// Date time format string
         /// </summary>
-        public const string DateTimeFormatString = "yyyy-MM-dd HH:mm:ss";
+        public const string DateTimeFormatString = "yyyy-MM-ddTHH:mm:ss";
 
         /// <summary>
         /// Default log category

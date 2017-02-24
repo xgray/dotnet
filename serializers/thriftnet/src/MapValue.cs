@@ -4,6 +4,7 @@ namespace Thrift.Net
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Bench;
@@ -163,14 +164,14 @@ namespace Thrift.Net
     public Dictionary<K, V> Read(XElement xe)
     {
       Dictionary<K, V> dict = new Dictionary<K, V>();
-      bool isKey = true;
 
+      bool isKey = true;
       K key = default(K);
       V value = default(V);
 
-      foreach(XElement ce in xe.Elements())
+      foreach (XElement ce in xe.Elements())
       {
-        if( isKey)
+        if (isKey)
         {
           key = this.KeyMetadata.Read(ce);
         }
@@ -186,7 +187,7 @@ namespace Thrift.Net
 
     public void Write(XElement xe, Dictionary<K, V> value)
     {
-      foreach(K key in value.Keys)
+      foreach (K key in value.Keys)
       {
         XElement ke = new XElement("Key");
         this.KeyMetadata.Write(ke, key);
@@ -194,6 +195,46 @@ namespace Thrift.Net
         XElement ve = new XElement("Value");
         this.ValueMetadata.Write(ve, value[key]);
         xe.Add(ve);
+      }
+    }
+
+    public Dictionary<K, V> Read(XmlReader reader)
+    {
+      Dictionary<K, V> dict = new Dictionary<K, V>();
+      if (!reader.IsEmptyElement)
+      {
+        bool isKey = true;
+        K key = default(K);
+        V value = default(V);
+        int saved = reader.Depth;
+        while (reader.Read() && reader.Depth > saved)
+        {
+          if (isKey)
+          {
+            key = this.KeyMetadata.Read(reader);
+          }
+          else
+          {
+            value = this.ValueMetadata.Read(reader);
+            dict.Add(key, value);
+          }
+          isKey = !isKey;
+        }
+      }
+
+      return dict;
+    }
+
+    public void Write(XmlWriter writer, Dictionary<K, V> value)
+    {
+      foreach (K key in value.Keys)
+      {
+        writer.WriteStartElement("Key");
+        this.KeyMetadata.Write(writer, key);
+        writer.WriteEndElement();
+        writer.WriteStartElement("Value");
+        this.ValueMetadata.Write(writer, value[key]);
+        writer.WriteEndElement();
       }
     }
   }

@@ -3,8 +3,9 @@ namespace Thrift.Net
 {
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
-  
+
   using Bench;
 
   using Thrift.Protocol;
@@ -18,7 +19,7 @@ namespace Thrift.Net
 
     public Expression Read(Expression iprot)
     {
-      return Expression.Call(iprot,typeof(TProtocol).GetMethod("ReadString"));
+      return Expression.Call(iprot, typeof(TProtocol).GetMethod("ReadString"));
     }
 
     public Expression Write(Expression oprot, Expression value)
@@ -43,6 +44,16 @@ namespace Thrift.Net
     public void Write(XElement xe, string value)
     {
       xe.Value = value;
+    }
+
+    public string Read(XmlReader reader)
+    {
+      return reader.ReadElementString();
+    }
+
+    public void Write(XmlWriter writer, string value)
+    {
+      writer.WriteValue(value);
     }
   }
 }

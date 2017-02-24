@@ -4,6 +4,7 @@ namespace Thrift.Net
   using System;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Bench;
@@ -55,5 +56,16 @@ namespace Thrift.Net
     {
       xe.Value = CommonUtils.ToString(value);
     }
+
+    public DateTime Read(XmlReader reader)
+    {
+      return CommonUtils.ToDateTime(reader.ReadElementString());
+    }
+
+    public void Write(XmlWriter writer, DateTime value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
+    
   }
 }

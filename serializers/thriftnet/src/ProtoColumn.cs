@@ -5,6 +5,7 @@ namespace Thrift.Net
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Thrift.Protocol;
@@ -13,7 +14,6 @@ namespace Thrift.Net
   {
     TType Type { get; }
   }
-
 
   public interface IProtoValue : IThriftValue
   {
@@ -29,6 +29,9 @@ namespace Thrift.Net
 
     V Read(XElement xe);
     void Write(XElement xe, V value);
+
+    V Read(XmlReader reader);
+    void Write(XmlWriter writer, V value);
   }
   public interface IProtoColumn<T>
   {
@@ -51,6 +54,10 @@ namespace Thrift.Net
     void Read(XElement iprot, T proto);
 
     void Write(XElement oprot, T proto);
+
+    void Read(XmlReader reader, T proto);
+
+    void Write(XmlWriter writer, T proto);
   }
 
   /// <summary>
@@ -152,7 +159,7 @@ namespace Thrift.Net
     public void Read(XElement xe, T proto)
     {
       V value = this.ValueMetadata.Read(xe);
-      this.Setter(proto, value);      
+      this.Setter(proto, value);
     }
 
     public void Write(XElement xe, T proto)
@@ -160,7 +167,26 @@ namespace Thrift.Net
       V value = this.Getter(proto);
       if (!this.IsDefault(value))
       {
-        this.ValueMetadata.Write(xe, value);
+        XElement fe = new XElement(this.Name);
+        this.ValueMetadata.Write(fe, value);
+        xe.Add(fe);
+      }
+    }
+
+    public void Read(XmlReader reader, T proto)
+    {
+      V value = this.ValueMetadata.Read(reader);
+      this.Setter(proto, value);
+    }
+
+    public void Write(XmlWriter writer, T proto)
+    {
+      V value = this.Getter(proto);
+      if (!this.IsDefault(value))
+      {
+        writer.WriteStartElement(this.Name);
+        this.ValueMetadata.Write(writer, value);
+        writer.WriteEndElement();
       }
     }
   }

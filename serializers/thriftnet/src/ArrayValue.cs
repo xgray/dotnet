@@ -4,6 +4,7 @@ namespace Thrift.Net
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Bench;
@@ -131,7 +132,7 @@ namespace Thrift.Net
     public V[] Read(XElement xe)
     {
       List<V> list = new List<V>();
-      foreach(XElement ce in xe.Elements())
+      foreach (XElement ce in xe.Elements())
       {
         list.Add(this.ValueMetadata.Read(ce));
       }
@@ -140,11 +141,35 @@ namespace Thrift.Net
 
     public void Write(XElement xe, V[] value)
     {
-      for( int i = 0; i < value.Length; i++)
+      for (int i = 0; i < value.Length; i++)
       {
         XElement ce = new XElement("Item");
         this.ValueMetadata.Write(ce, value[i]);
         xe.Add(ce);
+      }
+    }
+
+    public V[] Read(XmlReader reader)
+    {
+      List<V> list = new List<V>();
+      if (!reader.IsEmptyElement)
+      {
+        int saved = reader.Depth;
+        while (reader.Read() && reader.Depth > saved)
+        {
+          list.Add(this.ValueMetadata.Read(reader));
+        }
+      }
+      return list.ToArray();
+    }
+
+    public void Write(XmlWriter writer, V[] value)
+    {
+      for (int i = 0; i < value.Length; i++)
+      {
+        writer.WriteStartElement("Item");
+        this.ValueMetadata.Write(writer, value[i]);
+        writer.WriteEndElement();
       }
     }
   }

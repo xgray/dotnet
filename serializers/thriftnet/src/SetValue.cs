@@ -5,6 +5,7 @@ namespace Thrift.Net
   using System.Collections.Generic;
   using System.Linq.Expressions;
   using System.Reflection;
+  using System.Xml;
   using System.Xml.Linq;
 
   using Bench;
@@ -138,7 +139,7 @@ namespace Thrift.Net
     public HashSet<V> Read(XElement xe)
     {
       HashSet<V> set = new HashSet<V>();
-      foreach(XElement ce in xe.Elements())
+      foreach (XElement ce in xe.Elements())
       {
         set.Add(this.ValueMetadata.Read(ce));
       }
@@ -147,11 +148,35 @@ namespace Thrift.Net
 
     public void Write(XElement xe, HashSet<V> value)
     {
-      foreach(V item in value)
+      foreach (V item in value)
       {
         XElement ce = new XElement("Item");
         this.ValueMetadata.Write(ce, item);
         xe.Add(ce);
+      }
+    }
+
+    public HashSet<V> Read(XmlReader reader)
+    {
+      HashSet<V> set = new HashSet<V>();
+      if (!reader.IsEmptyElement)
+      {
+        int saved = reader.Depth;
+        while (reader.Read() && reader.Depth > saved)
+        {
+          set.Add(this.ValueMetadata.Read(reader));
+        }
+      }
+      return set;
+    }
+
+    public void Write(XmlWriter writer, HashSet<V> value)
+    {
+      foreach (V item in value)
+      {
+        writer.WriteStartElement("Item");
+        this.ValueMetadata.Write(writer, item);
+        writer.WriteEndElement();
       }
     }
   }
