@@ -7,7 +7,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
 
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class ByteValue : IProtoValue<byte>
@@ -58,6 +58,16 @@ namespace Thrift.Net
     }
 
     public void Write(XmlWriter writer, byte value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
+
+    public byte Read(JsonReader reader)
+    {
+      return CommonUtils.ToByte(reader.Value.ToString());      
+    }
+
+    public void Write(JsonWriter writer, byte value)
     {
       writer.WriteValue(CommonUtils.ToString(value));
     }

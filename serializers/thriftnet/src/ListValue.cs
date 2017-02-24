@@ -9,7 +9,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
 
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public interface IThriftListValue : IThriftValue
@@ -180,6 +180,26 @@ namespace Thrift.Net
         this.ValueMetadata.Write(writer, value[i]);
         writer.WriteEndElement();
       }
+    }
+
+    public List<V> Read(JsonReader reader)
+    {
+      List<V> list = new List<V>();
+      while (reader.Read() && reader.TokenType != JsonToken.EndArray)
+      {
+        list.Add(this.ValueMetadata.Read(reader));
+      }
+      return list;
+    }
+
+    public void Write(JsonWriter writer, List<V> value)
+    {
+      writer.WriteStartArray();
+      for (int i = 0; i < value.Count; i++)
+      {
+        this.ValueMetadata.Write(writer, value[i]);
+      }
+      writer.WriteEndArray();
     }
   }
 }

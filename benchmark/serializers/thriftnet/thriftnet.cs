@@ -35,6 +35,9 @@ namespace thriftnet
     [CommandLineSwitchParameter]
     public bool xml;
 
+    [CommandLineSwitchParameter]
+    public bool json;
+
     private Simple simpleInput;
     private Simple simpleOutput;
 
@@ -118,6 +121,16 @@ namespace thriftnet
         complexOutput = Proto<Complex>.FromXml(xml1);
         string xml2 = Proto<Complex>.GetXml(complexOutput);
         CommonUtils.ThrowIfFalse(xml1 == xml2);
+      }
+
+      if (this.json)
+      {
+        string json1 = Proto<Complex>.GetJson(complexOutput);
+        WriteLine(json1);
+        complexOutput = Proto<Complex>.FromJson(json1);
+        string json2 = Proto<Complex>.GetJson(complexOutput);
+        WriteLine(json2);
+        CommonUtils.ThrowIfFalse(json1 == json2);
       }
 
       WriteLine("simple:{0},{1},{2},{3}",

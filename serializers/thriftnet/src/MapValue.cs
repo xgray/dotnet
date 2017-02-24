@@ -8,6 +8,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
 
   using Bench;
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public interface IThriftMapValue : IThriftValue
@@ -237,5 +238,34 @@ namespace Thrift.Net
         writer.WriteEndElement();
       }
     }
+
+    public Dictionary<K, V> Read(JsonReader reader)
+    {
+      Dictionary<K, V> dict = new Dictionary<K, V>();
+      while (reader.Read() && reader.TokenType != JsonToken.EndArray)
+      {
+        reader.Read();
+        K key = this.KeyMetadata.Read(reader);
+        reader.Read();
+        V value = this.ValueMetadata.Read(reader);
+        reader.Read();
+        dict.Add(key, value);
+      }
+      return dict;
+    }
+
+    public void Write(JsonWriter writer, Dictionary<K, V> value)
+    {
+      writer.WriteStartArray();
+      foreach (K key in value.Keys)
+      {
+        writer.WriteStartArray();
+        this.KeyMetadata.Write(writer, key);
+        this.ValueMetadata.Write(writer, value[key]);
+        writer.WriteEndArray();
+      }
+      writer.WriteEndArray();
+    }
   }
 }
+

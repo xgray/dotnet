@@ -8,7 +8,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
 
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class GuidValue : IProtoValue<Guid>
@@ -61,6 +61,16 @@ namespace Thrift.Net
     }
 
     public void Write(XmlWriter writer, Guid value)
+    {
+      writer.WriteValue(value.ToString("N"));
+    }
+
+    public Guid Read(JsonReader reader)
+    {
+      return Guid.Parse(reader.Value.ToString());      
+    }
+
+    public void Write(JsonWriter writer, Guid value)
     {
       writer.WriteValue(value.ToString("N"));
     }

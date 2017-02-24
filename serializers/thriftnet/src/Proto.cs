@@ -13,6 +13,7 @@ namespace Thrift.Net
 
   using Bench;
 
+  using Newtonsoft.Json;
   using Thrift.Protocol;
   using Thrift.Transport;
 
@@ -125,13 +126,17 @@ namespace Thrift.Net
         OmitXmlDeclaration = true,
       };
 
-      MemoryStream stream = new MemoryStream();
-      XmlWriter writer = XmlWriter.Create(stream, writerSettings);
-      writer.WriteStartElement(typeof(T).Name);
-      Proto<T>.Write(writer, proto);
-      writer.WriteEndElement();
-      writer.Flush();
-      return Encoding.UTF8.GetString(stream.ToArray());
+      using (MemoryStream stream = new MemoryStream())
+      {
+        using (XmlWriter writer = XmlWriter.Create(stream, writerSettings))
+        {
+          writer.WriteStartElement(typeof(T).Name);
+          Proto<T>.Write(writer, proto);
+          writer.WriteEndElement();
+          writer.Flush();
+        }
+        return Encoding.UTF8.GetString(stream.ToArray());
+      }
     }
 
     public static T FromXml(string xml)
@@ -161,6 +166,65 @@ namespace Thrift.Net
     {
       XElement xe = XElement.Load(new StringReader(xml));
       return Proto<T>.Read(xe);
+    }
+
+    public static string GetJson(T proto)
+    {
+      using (StringWriter stringWriter = new StringWriter())
+      {
+        JsonWriter writer = new JsonTextWriter(stringWriter);
+        writer.Formatting = Newtonsoft.Json.Formatting.Indented;
+        Proto<T>.Write(writer, proto);
+        return stringWriter.ToString();
+      }
+    }
+
+    public static T FromJson(string json)
+    {
+      using (StringReader stringReader = new StringReader(json))
+      {
+        JsonReader reader = new JsonTextReader(stringReader);
+        reader.DateParseHandling = DateParseHandling.None;
+        reader.Read();
+        return Proto<T>.Read(reader);
+      }
+    }
+
+    public static T Read(JsonReader reader)
+    {
+      T proto = new T();
+      IDictionary<string, IProtoColumn<T>> metadata = instance.Value.metadata;
+
+      while (reader.Read() && reader.TokenType != JsonToken.EndObject)
+      {
+        IProtoColumn<T> column;
+        if (metadata.TryGetValue(reader.Value.ToString(), out column))
+        {
+          column.Read(reader, proto);
+        }
+        else
+        {
+          reader.Skip();
+        }
+      }
+
+      return proto;
+    }
+
+    public static void Write(JsonWriter writer, T proto)
+    {
+      IProtoColumn<T>[] columns = instance.Value.columns;
+
+      writer.WriteStartObject();
+      for (int index = 0; index < columns.Length; index++)
+      {
+        IProtoColumn<T> column = columns[index];
+        if (column != null)
+        {
+          column.Write(writer, proto);
+        }
+      }
+      writer.WriteEndObject();
     }
 
     public static T Read(TProtocol iprot)

@@ -173,15 +173,16 @@ namespace webcrap
           {url, list}
         },
       };
-
       
-      // string json = Proto<PCookies>.GetJson(cc);
-      // Console.WriteLine(json);
-      // Console.WriteLine();
-      // Console.WriteLine(Proto<PCookies>.GetJson(Proto<PCookies>.FromJson(json)));
-      // Console.WriteLine();
+      string json = Proto<PCookies>.GetJson(cc);
+      Console.WriteLine(json);
+      Console.WriteLine();
+      Console.WriteLine(Proto<PCookies>.GetJson(Proto<PCookies>.FromJson(json)));
+      Console.WriteLine();
       string xml = Proto<PCookies>.GetXml(cc);
       Console.WriteLine(xml);
+      Console.WriteLine(Proto<PCookies>.GetXml(Proto<PCookies>.FromXml(xml)));
+      Console.WriteLine();
       Console.WriteLine();
     }
 

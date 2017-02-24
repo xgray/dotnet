@@ -5,7 +5,7 @@ namespace Thrift.Net
   using System.Reflection;
   using System.Xml;
   using System.Xml.Linq;
-
+  using Newtonsoft.Json;
   using Bench;
 
   using Thrift.Protocol;
@@ -52,6 +52,16 @@ namespace Thrift.Net
     }
 
     public void Write(XmlWriter writer, string value)
+    {
+      writer.WriteValue(value);
+    }
+
+    public string Read(JsonReader reader)
+    {
+      return reader.Value.ToString();
+    }
+
+    public void Write(JsonWriter writer, string value)
     {
       writer.WriteValue(value);
     }

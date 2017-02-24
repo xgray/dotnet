@@ -8,7 +8,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
 
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class DateTimeValue : IProtoValue<DateTime>
@@ -66,6 +66,15 @@ namespace Thrift.Net
     {
       writer.WriteValue(CommonUtils.ToString(value));
     }
-    
+
+    public DateTime Read(JsonReader reader)
+    {
+      return CommonUtils.ToDateTime(reader.Value.ToString());      
+    }
+
+    public void Write(JsonWriter writer, DateTime value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
   }
 }

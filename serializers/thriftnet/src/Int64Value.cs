@@ -7,7 +7,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
   
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class Int64Value : IProtoValue<long>
@@ -52,6 +52,16 @@ namespace Thrift.Net
     }
 
     public void Write(XmlWriter writer, long value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
+
+    public long Read(JsonReader reader)
+    {
+      return CommonUtils.ToInt64(reader.Value.ToString());      
+    }
+
+    public void Write(JsonWriter writer, long value)
     {
       writer.WriteValue(CommonUtils.ToString(value));
     }

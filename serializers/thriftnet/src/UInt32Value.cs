@@ -7,7 +7,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
   
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class UInt32Value : IProtoValue<uint>
@@ -62,5 +62,15 @@ namespace Thrift.Net
     {
       writer.WriteValue(CommonUtils.ToString(value));
     }    
+
+    public uint Read(JsonReader reader)
+    {
+      return CommonUtils.ToUInt32(reader.Value.ToString());      
+    }
+
+    public void Write(JsonWriter writer, uint value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
   }
 }

@@ -7,7 +7,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
   
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class Int32Value : IProtoValue<int>
@@ -53,6 +53,16 @@ namespace Thrift.Net
     }
 
     public void Write(XmlWriter writer, int value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
+
+    public int Read(JsonReader reader)
+    {
+      return CommonUtils.ToInt32(reader.Value.ToString());      
+    }
+
+    public void Write(JsonWriter writer, int value)
     {
       writer.WriteValue(CommonUtils.ToString(value));
     }

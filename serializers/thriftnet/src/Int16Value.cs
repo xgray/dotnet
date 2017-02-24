@@ -7,7 +7,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
   
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class Int16Value : IProtoValue<short>
@@ -56,5 +56,15 @@ namespace Thrift.Net
     {
       writer.WriteValue(CommonUtils.ToString(value));
     }    
+
+    public short Read(JsonReader reader)
+    {
+      return CommonUtils.ToInt16(reader.Value.ToString());      
+    }
+
+    public void Write(JsonWriter writer, short value)
+    {
+      writer.WriteValue(CommonUtils.ToString(value));
+    }
   }
 }

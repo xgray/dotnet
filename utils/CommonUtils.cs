@@ -1169,7 +1169,11 @@ namespace Bench
         /// <returns></returns>
         public static DateTime ToDateTime(string str)
         {
-            DateTime dtValue = DateTime.ParseExact(str, DateTimeFormatString, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+            DateTime dtValue = DateTime.ParseExact(
+                str, 
+                DateTimeFormatString, 
+                CultureInfo.InvariantCulture, 
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
             return dtValue;
         }
 

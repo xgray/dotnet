@@ -7,7 +7,7 @@ namespace Thrift.Net
   using System.Xml.Linq;
 
   using Bench;
-
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public class StructValue<T> : IProtoValue<T> where T : new()
@@ -59,6 +59,16 @@ namespace Thrift.Net
     }
 
     public void Write(XmlWriter writer, T value)
+    {
+      Proto<T>.Write(writer, value);
+    }    
+
+    public T Read(JsonReader reader)
+    {
+      return Proto<T>.Read(reader);
+    }
+
+    public void Write(JsonWriter writer, T value)
     {
       Proto<T>.Write(writer, value);
     }    

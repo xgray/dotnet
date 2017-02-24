@@ -8,6 +8,7 @@ namespace Thrift.Net
   using System.Xml;
   using System.Xml.Linq;
 
+  using Newtonsoft.Json;
   using Thrift.Protocol;
 
   public interface IThriftValue
@@ -32,6 +33,9 @@ namespace Thrift.Net
 
     V Read(XmlReader reader);
     void Write(XmlWriter writer, V value);
+
+    V Read(JsonReader reader);
+    void Write(JsonWriter writer, V value);
   }
   public interface IProtoColumn<T>
   {
@@ -48,16 +52,16 @@ namespace Thrift.Net
     IProtoValue Value { get; }
 
     void Read(TProtocol iprot, T proto);
-
     void Write(TProtocol oprot, T proto);
 
     void Read(XElement iprot, T proto);
-
     void Write(XElement oprot, T proto);
 
     void Read(XmlReader reader, T proto);
-
     void Write(XmlWriter writer, T proto);
+
+    void Read(JsonReader reader, T proto);
+    void Write(JsonWriter writer, T proto);
   }
 
   /// <summary>
@@ -187,6 +191,23 @@ namespace Thrift.Net
         writer.WriteStartElement(this.Name);
         this.ValueMetadata.Write(writer, value);
         writer.WriteEndElement();
+      }
+    }
+
+    public void Read(JsonReader reader, T proto)
+    {
+      reader.Read();
+      V value = this.ValueMetadata.Read(reader);
+      this.Setter(proto, value);
+    }
+
+    public void Write(JsonWriter writer, T proto)
+    {
+      V value = this.Getter(proto);
+      if (!this.IsDefault(value))
+      {
+        writer.WritePropertyName(this.Name);
+        this.ValueMetadata.Write(writer, value);
       }
     }
   }
