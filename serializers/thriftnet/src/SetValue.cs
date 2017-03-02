@@ -149,9 +149,12 @@ namespace Thrift.Net
 
     public void Write(XElement xe, HashSet<V> value)
     {
+      IStructValue structValue = this.ValueMetadata as IStructValue;
+      string itemTag = structValue?.StructType.Name ?? "Item";
+
       foreach (V item in value)
       {
-        XElement ce = new XElement("Item");
+        XElement ce = new XElement(itemTag);
         this.ValueMetadata.Write(ce, item);
         xe.Add(ce);
       }
@@ -173,9 +176,12 @@ namespace Thrift.Net
 
     public void Write(XmlWriter writer, HashSet<V> value)
     {
+      IStructValue structValue = this.ValueMetadata as IStructValue;
+      string itemTag = structValue?.StructType.Name ?? "Item";
+
       foreach (V item in value)
       {
-        writer.WriteStartElement("Item");
+        writer.WriteStartElement(itemTag);
         this.ValueMetadata.Write(writer, item);
         writer.WriteEndElement();
       }

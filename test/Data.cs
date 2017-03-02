@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-
-using Xunit;
 
 using Thrift.Net;
 
@@ -11,16 +8,16 @@ namespace Tests
   [Proto]
   public class Simple
   {
-    [ProtoColumn(1)]
+    [ProtoColumn(10)]
     public string Value { get; set; }
 
-    [ProtoColumn(2)]
+    [ProtoColumn(20)]
     public short ShortValue { get; set; }
 
-    [ProtoColumn(3)]
+    [ProtoColumn(30)]
     public int IntValue { get; set; }
 
-    [ProtoColumn(4)]
+    [ProtoColumn(40)]
     public long LongValue { get; set; }
 
 
@@ -44,22 +41,28 @@ namespace Tests
   [Proto]
   public class Complex
   {
-    [ProtoColumn(1)]
+    [ProtoColumn(10)]
     public Simple SimpleValue { get; set; }
 
-    [ProtoColumn(2)]
+    [ProtoColumn(20)]
     public List<Simple> ListValue { get; set; }
 
-    [ProtoColumn(3)]
+    [ProtoColumn(21)]
+    public List<List<Simple>> ListListValue { get; set; }
+
+    [ProtoColumn(22)]
+    public List<List<int>> ListListIntValue { get; set; }
+
+    [ProtoColumn(30)]
     public HashSet<Simple> SetValue { get; set; }
 
-    [ProtoColumn(4)]
+    [ProtoColumn(40)]
     public Dictionary<string, Simple> MapValue { get; set; }
 
-    [ProtoColumn(5)]
+    [ProtoColumn(50)]
     public Simple[] ArrayValue { get; set; }
 
-    [ProtoColumn(6)]
+    [ProtoColumn(60)]
     public string[] StringArray { get; set; }
 
     public static Complex Create(
@@ -79,6 +82,16 @@ namespace Tests
             simple,
             simple,
             simple
+        },
+        ListListValue = new List<List<Simple>>
+        {
+            new List<Simple> { simple, simple },
+            new List<Simple> { simple, simple },
+        },
+        ListListIntValue = new List<List<int>>
+        {
+            new List<int> { intValue, intValue+1 },
+            new List<int> { intValue+2, intValue+3 },
         },
         SetValue = new HashSet<Simple>
         {

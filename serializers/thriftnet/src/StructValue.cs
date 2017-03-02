@@ -1,6 +1,7 @@
 ﻿
 namespace Thrift.Net
 {
+  using System;
   using System.Linq.Expressions;
   using System.Reflection;
   using System.Xml;
@@ -10,17 +11,27 @@ namespace Thrift.Net
   using Newtonsoft.Json;
   using Thrift.Protocol;
 
-  public class StructValue<T> : IProtoValue<T> where T : new()
+  public interface IStructValue
+  {
+    Type StructType { get; }
+  }
+
+  public class StructValue<T> : IProtoValue<T>, IStructValue where T : new()
   {
     public TType Type
     {
       get { return TType.Struct; }
     }
 
+    Type IStructValue.StructType
+    {
+      get { return typeof(T); }
+    }
+
     public Expression Read(Expression iprot)
     {
       return Expression.Call(
-        typeof(Proto<T>).GetMethod("Read", new[] {typeof(TProtocol)}),
+        typeof(Proto<T>).GetMethod("Read", new[] { typeof(TProtocol) }),
         iprot);
     }
     public Expression Write(Expression oprot, Expression value)
@@ -28,7 +39,7 @@ namespace Thrift.Net
       CommonUtils.ThrowIfFalse(value.Type == typeof(T));
 
       return Expression.Call(
-        typeof(Proto<T>).GetMethod("Write", new[] {typeof(TProtocol), typeof(T)}),
+        typeof(Proto<T>).GetMethod("Write", new[] { typeof(TProtocol), typeof(T) }),
         oprot,
         value);
     }
@@ -61,7 +72,7 @@ namespace Thrift.Net
     public void Write(XmlWriter writer, T value)
     {
       Proto<T>.Write(writer, value);
-    }    
+    }
 
     public T Read(JsonReader reader)
     {
@@ -71,6 +82,6 @@ namespace Thrift.Net
     public void Write(JsonWriter writer, T value)
     {
       Proto<T>.Write(writer, value);
-    }    
+    }
   }
 }

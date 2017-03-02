@@ -362,9 +362,14 @@ namespace Thrift.Net
         maxID = Math.Max(col.ID, maxID);
       }
 
-      if (minID != 1 || maxID != count)
+      // if (minID != 1 || maxID != count)
+      // {
+      //   throw new ProtoException(ProtoErrorCode.InvalidArgument, "Column IDs are not consecutive starting from 1");
+      // }
+
+      if (minID <=  0 && maxID > short.MaxValue)
       {
-        throw new ProtoException(ProtoErrorCode.InvalidArgument, "Column IDs are not consecutive starting from 1");
+        throw new ProtoException(ProtoErrorCode.InvalidArgument, "Column IDs must be unique and between 1 to 65535");
       }
 
       IProtoColumn<T>[] columns = new IProtoColumn<T>[maxID + 1];

@@ -8,14 +8,23 @@ namespace Tests
     public class Tests
     {
         [Fact]
-        public void Test1() 
+        public void TestXml() 
         {
-            Simple simple = Simple.Create();
-            Console.WriteLine(Proto<Simple>.ToXml(simple));
-            Console.WriteLine(Proto<Simple>.ToJson(simple));
-            Complex complex = Complex.Create();
-            Console.WriteLine(Proto<Complex>.ToXml(complex));
-            Console.WriteLine(Proto<Complex>.ToJson(complex));
+            Simple simple1 = Simple.Create();
+            string xml1 = Proto<Simple>.ToXml(simple1);
+            Simple simple2 = Proto<Simple>.FromXml(xml1);
+            string xml2 = Proto<Simple>.ToXml(simple2);
+            Assert.Equal(xml1, xml2);
+        }
+
+        [Fact]
+        public void TestJson() 
+        {
+            Simple simple1 = Simple.Create();
+            string json1 = Proto<Simple>.ToJson(simple1);
+            Simple simple2 = Proto<Simple>.FromJson(json1);
+            string json2 = Proto<Simple>.ToJson(simple2);
+            Assert.Equal(json1, json2);
         }
     }
 }
