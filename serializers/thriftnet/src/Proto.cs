@@ -47,6 +47,78 @@ namespace Thrift.Net
       System.Diagnostics.Debug.Assert(instance.Value != null);
     }
 
+    public static string ToXml(T proto)
+    {
+      XmlWriterSettings writerSettings = new XmlWriterSettings
+      {
+        Indent = true,
+        IndentChars = "  ",
+        OmitXmlDeclaration = true,
+      };
+
+      using (MemoryStream stream = new MemoryStream())
+      {
+        using (XmlWriter writer = XmlWriter.Create(stream, writerSettings))
+        {
+          writer.WriteStartElement(typeof(T).Name);
+          Proto<T>.Write(writer, proto);
+          writer.WriteEndElement();
+          writer.Flush();
+        }
+        return Encoding.UTF8.GetString(stream.ToArray());
+      }
+    }
+
+    public static T FromXml(string xml)
+    {
+      XmlReaderSettings readerSettings = new XmlReaderSettings
+      {
+        IgnoreProcessingInstructions = true,
+        IgnoreWhitespace = true,
+        IgnoreComments = true,
+      };
+
+      MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
+      XmlReader reader = XmlReader.Create(stream, readerSettings);
+      reader.Read();
+
+      return Proto<T>.Read(reader);
+    }
+
+    public static XElement ToXDoc(T proto)
+    {
+      XElement xe = new XElement(typeof(T).Name);
+      Proto<T>.Write(xe, proto);
+      return xe;
+    }
+
+    public static T FromXDoc(XElement xe)
+    {
+      // XElement xe = XElement.Load(new StringReader(xml));
+      return Proto<T>.Read(xe);
+    }
+
+    public static string ToJson(T proto)
+    {
+      using (StringWriter stringWriter = new StringWriter())
+      {
+        JsonWriter writer = new JsonTextWriter(stringWriter);
+        writer.Formatting = Newtonsoft.Json.Formatting.Indented;
+        Proto<T>.Write(writer, proto);
+        return stringWriter.ToString();
+      }
+    }
+
+    public static T FromJson(string json)
+    {
+      using (StringReader stringReader = new StringReader(json))
+      {
+        JsonReader reader = new JsonTextReader(stringReader);
+        reader.DateParseHandling = DateParseHandling.None;
+        reader.Read();
+        return Proto<T>.Read(reader);
+      }
+    }
     public static T Read(XElement xe)
     {
       T proto = new T();
@@ -114,79 +186,6 @@ namespace Thrift.Net
         {
           column.Write(writer, proto);
         }
-      }
-    }
-
-    public static string GetXml(T proto)
-    {
-      XmlWriterSettings writerSettings = new XmlWriterSettings
-      {
-        Indent = true,
-        IndentChars = "  ",
-        OmitXmlDeclaration = true,
-      };
-
-      using (MemoryStream stream = new MemoryStream())
-      {
-        using (XmlWriter writer = XmlWriter.Create(stream, writerSettings))
-        {
-          writer.WriteStartElement(typeof(T).Name);
-          Proto<T>.Write(writer, proto);
-          writer.WriteEndElement();
-          writer.Flush();
-        }
-        return Encoding.UTF8.GetString(stream.ToArray());
-      }
-    }
-
-    public static T FromXml(string xml)
-    {
-      XmlReaderSettings readerSettings = new XmlReaderSettings
-      {
-        IgnoreProcessingInstructions = true,
-        IgnoreWhitespace = true,
-        IgnoreComments = true,
-      };
-
-      MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-      XmlReader reader = XmlReader.Create(stream, readerSettings);
-      reader.Read();
-
-      return Proto<T>.Read(reader);
-    }
-
-    public static string GetXml2(T proto)
-    {
-      XElement xe = new XElement(typeof(T).Name);
-      Proto<T>.Write(xe, proto);
-      return xe.ToString();
-    }
-
-    public static T FromXml2(string xml)
-    {
-      XElement xe = XElement.Load(new StringReader(xml));
-      return Proto<T>.Read(xe);
-    }
-
-    public static string GetJson(T proto)
-    {
-      using (StringWriter stringWriter = new StringWriter())
-      {
-        JsonWriter writer = new JsonTextWriter(stringWriter);
-        writer.Formatting = Newtonsoft.Json.Formatting.Indented;
-        Proto<T>.Write(writer, proto);
-        return stringWriter.ToString();
-      }
-    }
-
-    public static T FromJson(string json)
-    {
-      using (StringReader stringReader = new StringReader(json))
-      {
-        JsonReader reader = new JsonTextReader(stringReader);
-        reader.DateParseHandling = DateParseHandling.None;
-        reader.Read();
-        return Proto<T>.Read(reader);
       }
     }
 

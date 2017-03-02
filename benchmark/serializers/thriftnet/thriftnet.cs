@@ -116,19 +116,19 @@ namespace thriftnet
 
       if (this.xml)
       {
-        string xml1 = Proto<Complex>.GetXml(complexOutput);
+        string xml1 = Proto<Complex>.ToXml(complexOutput);
         WriteLine(xml1);
         complexOutput = Proto<Complex>.FromXml(xml1);
-        string xml2 = Proto<Complex>.GetXml(complexOutput);
+        string xml2 = Proto<Complex>.ToXml(complexOutput);
         CommonUtils.ThrowIfFalse(xml1 == xml2);
       }
 
       if (this.json)
       {
-        string json1 = Proto<Complex>.GetJson(complexOutput);
+        string json1 = Proto<Complex>.ToJson(complexOutput);
         WriteLine(json1);
         complexOutput = Proto<Complex>.FromJson(json1);
-        string json2 = Proto<Complex>.GetJson(complexOutput);
+        string json2 = Proto<Complex>.ToJson(complexOutput);
         WriteLine(json2);
         CommonUtils.ThrowIfFalse(json1 == json2);
       }

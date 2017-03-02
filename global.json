@@ -2,6 +2,7 @@
     "projects": [
         "benchmark",
         "serializers",
+        "test",
         "utils",
         "webcrap"
     ]

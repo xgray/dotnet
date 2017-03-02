@@ -174,14 +174,14 @@ namespace webcrap
         },
       };
       
-      string json = Proto<PCookies>.GetJson(cc);
+      string json = Proto<PCookies>.ToJson(cc);
       Console.WriteLine(json);
       Console.WriteLine();
-      Console.WriteLine(Proto<PCookies>.GetJson(Proto<PCookies>.FromJson(json)));
+      Console.WriteLine(Proto<PCookies>.ToJson(Proto<PCookies>.FromJson(json)));
       Console.WriteLine();
-      string xml = Proto<PCookies>.GetXml(cc);
+      string xml = Proto<PCookies>.ToXml(cc);
       Console.WriteLine(xml);
-      Console.WriteLine(Proto<PCookies>.GetXml(Proto<PCookies>.FromXml(xml)));
+      Console.WriteLine(Proto<PCookies>.ToXml(Proto<PCookies>.FromXml(xml)));
       Console.WriteLine();
       Console.WriteLine();
     }
@@ -237,9 +237,6 @@ namespace webcrap
       string json2 = Encoding.UTF8.GetString(trans2.GetBuffer(), 0, trans2.Length);
       Console.WriteLine(json2);
       Console.WriteLine();
-      
-
-
     }
   }
 }
