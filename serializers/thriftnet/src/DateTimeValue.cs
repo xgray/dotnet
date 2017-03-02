@@ -21,8 +21,9 @@ namespace Thrift.Net
     public Expression Read(Expression iprot)
     {
       return Expression.New(
-        typeof(DateTime).GetConstructor(typeof(long)),
-        Expression.Call(iprot, typeof(TProtocol).GetMethod("ReadI64")));
+        typeof(DateTime).GetConstructor(typeof(long), typeof(DateTimeKind)),
+        Expression.Call(iprot, typeof(TProtocol).GetMethod("ReadI64")),
+        Expression.Constant(DateTimeKind.Utc));
     }
 
     public Expression Write(Expression oprot, Expression value)

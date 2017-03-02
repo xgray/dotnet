@@ -20,6 +20,11 @@ namespace Tests
     [ProtoColumn(40)]
     public long LongValue { get; set; }
 
+    [ProtoColumn(50)]
+    public DateTime DateTimeValue { get; set; }
+
+    [ProtoColumn(60)]
+    public TimeSpan TimeSpanValue { get; set; }
 
     public static Simple Create(
         string value = "abc",
@@ -33,7 +38,9 @@ namespace Tests
         Value = value,
         ShortValue = shortValue,
         IntValue = intValue,
-        LongValue = longValue
+        LongValue = longValue,
+        DateTimeValue = DateTime.UtcNow,
+        TimeSpanValue = TimeSpan.FromSeconds(longValue)
       };
     }
   }

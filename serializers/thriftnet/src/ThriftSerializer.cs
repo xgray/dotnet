@@ -54,7 +54,7 @@ namespace Thrift.Net
       return Proto<T>.Read(prot);
     }
 
-    public static byte[] GetBytes(T value)
+    public static byte[] ToBytes(T value)
     {
       TMemoryBuffer trans = new TMemoryBuffer();
       TProtocol prot = new TCompactProtocol(trans);

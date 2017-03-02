@@ -651,6 +651,10 @@ namespace Thrift.Net
       {
         return new DateTimeValue();
       }
+      else if (type == typeof(TimeSpan))
+      {
+        return new TimeSpanValue();
+      }
       else if (type == typeof(Guid))
       {
         return new GuidValue();

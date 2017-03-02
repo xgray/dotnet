@@ -22,9 +22,14 @@ namespace Bench
     public static partial class CommonUtils
     {
         /// <summary>
-        /// Date time format string
+        /// DateTime format string
         /// </summary>
         public const string DateTimeFormatString = "yyyy-MM-ddTHH:mm:ss";
+
+        /// <summary>
+        /// TimeSpan format string
+        /// </summary>
+        public const string TimeSpanFormatString = @"d\.hh\:mm\:ss";
 
         /// <summary>
         /// Default log category
@@ -1178,6 +1183,27 @@ namespace Bench
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string ToString(TimeSpan value)
+        {
+            return value.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static TimeSpan ToTimeSpan(string str)
+        {
+            TimeSpan tsValue = TimeSpan.Parse(str);
+            return tsValue;
+        }
+
+        /// <summary>
         /// Converts object to json string
         /// </summary>
         /// <typeparam name="T">object type</typeparam>
@@ -1602,15 +1628,6 @@ namespace Bench
             return array ?? new T[0];
         }
 
-        /// <summary>
-        /// Return a safe string
-        /// </summary>
-        /// <param name="str">string value</param>
-        /// <returns>if str is null, return empty. other the string value</returns>
-        public static string SafeString(this string str)
-        {
-            return str ?? string.Empty;
-        }
 
         /// <summary>
         /// Return a safe sub string
@@ -1690,22 +1707,6 @@ namespace Bench
             catch
             {
             }
-        }
-
-        #endregion
-
-        #region String utilities
-
-        /// <summary>
-        /// string compare helper function
-        /// </summary>
-        /// <param name="x">first string</param>
-        /// <param name="y">second string</param>
-        /// <param name="ignoreCase">ignore case</param>
-        /// <returns>true if x equal to y</returns>
-        public static bool Matches(this string x, string y, bool ignoreCase = true)
-        {
-            return string.Compare(x, y, ignoreCase) == 0;
         }
 
         #endregion
