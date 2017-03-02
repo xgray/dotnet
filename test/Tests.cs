@@ -33,11 +33,12 @@ namespace Tests
         [Fact]
         public void TestSimpleXml() 
         {
-            Simple simple1 = Simple.Create();
+            Simple simple1 = Simple.Random();
             string xml1 = Proto<Simple>.ToXml(simple1);
             Simple simple2 = Proto<Simple>.FromXml(xml1);
             string xml2 = Proto<Simple>.ToXml(simple2);
             Assert.Equal(xml1, xml2);
+            Console.WriteLine(xml1);
         }
 
         [Fact]

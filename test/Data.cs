@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Thrift.Net;
+using Bench;
 
 namespace Tests
 {
@@ -41,6 +42,19 @@ namespace Tests
         LongValue = longValue,
         DateTimeValue = DateTime.UtcNow,
         TimeSpanValue = TimeSpan.FromSeconds(longValue)
+      };
+    }
+
+    public static Simple Random(int seed = 10)
+    {
+      return new Simple
+      {
+        Value = CommonUtils.Random.NextString(seed, seed*2),
+        ShortValue = CommonUtils.Random.NextInt16(),
+        IntValue = CommonUtils.Random.Next(),
+        LongValue = CommonUtils.Random.NextInt64(),
+        DateTimeValue = CommonUtils.Random.NextDateTime(),
+        TimeSpanValue = TimeSpan.FromSeconds(CommonUtils.Random.Next())
       };
     }
   }
