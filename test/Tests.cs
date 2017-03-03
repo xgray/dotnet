@@ -38,7 +38,6 @@ namespace Tests
             Simple simple2 = Proto<Simple>.FromXml(xml1);
             string xml2 = Proto<Simple>.ToXml(simple2);
             Assert.Equal(xml1, xml2);
-            Console.WriteLine(xml1);
         }
 
         [Fact]
