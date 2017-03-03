@@ -68,7 +68,12 @@ namespace Bench
     /// <returns>safe array</returns>
     public static T[] SafeArray<T>(this T[] array)
     {
-      return array ?? new T[0];
+      return array ?? Array<T>.Empty;
+    }
+
+    public static bool IsNullOrEmpty<T>(this T[] array)
+    {
+      return array == null || array.Length == 0;
     }
 
     /// <summary>
