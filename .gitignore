@@ -30,7 +30,9 @@ Thumbs.db
 
 # VS code and CLR
 .vscode
+.vs
 project.lock.json
+*.xproj
 
 # Mac bundle stuff
 *.dmg
