@@ -59,7 +59,7 @@
         "Bond.Compiler": "5.1.0",
         "Bond.CSharp": "5.1.0",
 
-        "serializers": "1.0.0",
+        "serializer": "1.0.0",
         "utils": "1.0.0"
       },
       "imports": [

@@ -1,7 +1,7 @@
 {
     "projects": [
         "benchmark",
-        "serializers",
+        "serializer",
         "test",
         "utils",
         "webcrap"
