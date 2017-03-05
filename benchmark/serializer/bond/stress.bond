@@ -1,15 +1,21 @@
 namespace bond
 
 struct Simple {
-  1: string value;
-  2: int32 shortValue;
-  3: int32 intValue;
-  4: int64 longValue;
+  1: string Value;
+  2: int32 ShortValue;
+  3: int32 IntValue;
+  4: int64 LongValue;
 }
 
 struct Complex {
-  1: Simple simpleValue;
-  2: vector<Simple> listValue;
+  1: Simple SimpleValue;
+  2: vector<Simple> ListValue;
+//  3: set<Simple> SetValue;
+  4: map<string,Simple> MapValue;
+//  5: list<set<map<string,list<Simple>>>> ListSetMap;
+  6: map<string, list<map<string,Simple>> > MapList;
+  7: list<list<string>> ListOfList;
+  8: list<list<list<string>>> ListOfListOfList;
 }
 
 struct Record

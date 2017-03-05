@@ -33,16 +33,16 @@ namespace bond
     public partial class Simple
     {
         [global::Bond.Id(1)]
-        public string value { get; set; }
+        public string Value { get; set; }
 
         [global::Bond.Id(2)]
-        public int shortValue { get; set; }
+        public int ShortValue { get; set; }
 
         [global::Bond.Id(3)]
-        public int intValue { get; set; }
+        public int IntValue { get; set; }
 
         [global::Bond.Id(4)]
-        public long longValue { get; set; }
+        public long LongValue { get; set; }
 
         public Simple()
             : this("bond.Simple", "Simple")
@@ -50,7 +50,7 @@ namespace bond
 
         protected Simple(string fullName, string name)
         {
-            value = "";
+            Value = "";
         }
     }
 
@@ -59,10 +59,22 @@ namespace bond
     public partial class Complex
     {
         [global::Bond.Id(1)]
-        public Simple simpleValue { get; set; }
+        public Simple SimpleValue { get; set; }
 
         [global::Bond.Id(2)]
-        public List<Simple> listValue { get; set; }
+        public List<Simple> ListValue { get; set; }
+
+        [global::Bond.Id(4)]
+        public Dictionary<string, Simple> MapValue { get; set; }
+
+        [global::Bond.Id(6)]
+        public Dictionary<string, LinkedList<Dictionary<string, Simple>>> MapList { get; set; }
+
+        [global::Bond.Id(7)]
+        public LinkedList<LinkedList<string>> ListOfList { get; set; }
+
+        [global::Bond.Id(8)]
+        public LinkedList<LinkedList<LinkedList<string>>> ListOfListOfList { get; set; }
 
         public Complex()
             : this("bond.Complex", "Complex")
@@ -70,8 +82,12 @@ namespace bond
 
         protected Complex(string fullName, string name)
         {
-            simpleValue = new Simple();
-            listValue = new List<Simple>();
+            SimpleValue = new Simple();
+            ListValue = new List<Simple>();
+            MapValue = new Dictionary<string, Simple>();
+            MapList = new Dictionary<string, LinkedList<Dictionary<string, Simple>>>();
+            ListOfList = new LinkedList<LinkedList<string>>();
+            ListOfListOfList = new LinkedList<LinkedList<LinkedList<string>>>();
         }
     }
 
