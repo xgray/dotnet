@@ -1,0 +1,71 @@
+namespace bond
+
+struct Simple {
+  1: string value;
+  2: int32 shortValue;
+  3: int32 intValue;
+  4: int64 longValue;
+}
+
+struct Complex {
+  1: Simple simpleValue;
+  2: vector<Simple> listValue;
+}
+
+struct Record
+{
+    0: string Name;
+    1: vector<double> Constants;
+}
+
+using guid_str = string;
+using guid_bin = blob;
+
+struct GuidExample
+{
+    0: guid_str id_str;
+    1: guid_bin id_bin;
+}
+
+struct Generic1<T>
+{
+    0: nullable<T> Field;
+}
+
+struct Generic2<T : value>
+{
+    0: T Field = nothing;
+}
+
+struct GenericExample
+{
+    0: Generic1<Generic2<int32>> Field;
+}
+
+enum ShapeType
+{
+    Unknown,
+    Circle,
+    Rectange
+}
+
+struct Shape
+{
+    0: ShapeType Type = Unknown;
+}
+
+struct Circle : Shape
+{
+    0: double Radius;
+}
+
+struct Rectangle : Shape
+{
+    0: double Width;
+    1: double Height;
+}
+
+struct Polymorphic
+{
+    0: vector<bonded<Shape>> Shapes;
+} 
