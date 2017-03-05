@@ -29,7 +29,7 @@
 
         "Newtonsoft.Json": "9.0.1",
 
-        "serializers": "1.0.0",
+        "serializer": "1.0.0",
         "utils": "1.0.0"
       },
       "imports": "dnxcore50"
