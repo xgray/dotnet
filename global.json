@@ -1,9 +1,0 @@
-{
-    "projects": [
-        "benchmark",
-        "serializer",
-        "test",
-        "utils",
-        "webcrap"
-    ]
-}
