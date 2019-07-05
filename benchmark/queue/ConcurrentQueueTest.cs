@@ -5,7 +5,7 @@ namespace Bench
   using System.Threading;
 
   [CommandModule(ShortName = "cqueue")]
-  [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+  [BenchmarkDotNet.Attributes.SimpleJob]
   public class ConcurrentQueueTest : BenchTest
   {
     [CommandLineParameter]
@@ -17,7 +17,7 @@ namespace Bench
     [CommandLineParameter]
     public int workers = 4;
 
-    [BenchmarkDotNet.Attributes.Setup]
+    [BenchmarkDotNet.Attributes.GlobalSetup]
     public override void Setup()
     {
     }

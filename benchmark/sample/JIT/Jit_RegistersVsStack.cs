@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Attributes.Jobs;
 
 namespace BenchmarkDotNet.Samples.JIT
 {
@@ -11,7 +10,7 @@ namespace BenchmarkDotNet.Samples.JIT
         [Params(false, true)]
         public bool CallStopwatchTimestamp { get; set; }
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             if (CallStopwatchTimestamp)

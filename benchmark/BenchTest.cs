@@ -9,7 +9,6 @@ namespace Bench
   using System.Reflection;
 
   using BenchmarkDotNet.Attributes;
-  using BenchmarkDotNet.Attributes.Jobs;
 
   using BenchmarkDotNet.Running;
 

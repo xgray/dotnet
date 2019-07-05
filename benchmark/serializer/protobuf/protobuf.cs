@@ -18,7 +18,7 @@ namespace protobuf
   using Google.Protobuf;
 
   [CommandModule(ShortName = "protobuf")]
-  [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+  [BenchmarkDotNet.Attributes.SimpleJob]
   public class ProtoBufBench : SerializeTest
   {
     [CommandLineParameter]
@@ -32,7 +32,7 @@ namespace protobuf
 
     private byte[] buffer;
 
-    [BenchmarkDotNet.Attributes.Setup]
+    [BenchmarkDotNet.Attributes.GlobalSetup]
     public override void Setup()
     {
       simpleInput = new Simple();

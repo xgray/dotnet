@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Attributes.Jobs;
 
 namespace BenchmarkDotNet.Samples.Framework
 {

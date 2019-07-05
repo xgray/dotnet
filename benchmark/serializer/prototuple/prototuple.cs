@@ -18,7 +18,7 @@ namespace prototuple
   using ProtoInsight;
 
   [CommandModule(ShortName="prototuple")]
-  [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+  [BenchmarkDotNet.Attributes.SimpleJob]
   public class ProtoTupleBench : SerializeTest
   {
     [CommandLineParameter]
@@ -35,7 +35,7 @@ namespace prototuple
     private ProtoSchema[] simpleSchema;
     private ProtoSchema[] complexSchema;
 
-    [BenchmarkDotNet.Attributes.Setup]
+    [BenchmarkDotNet.Attributes.GlobalSetup]
     public override void Setup()
     {
       simpleInput = new Simple();
