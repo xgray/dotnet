@@ -38,7 +38,7 @@ PROGRAM OUTPUT:
 using System;
 
 [Bench.CommandModule]
-[BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+[BenchmarkDotNet.Attributes.SimpleJob]
 public class NBody : Bench.BenchTest
 {
   [Bench.CommandLineParameter]

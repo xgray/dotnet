@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 [Bench.CommandModule]
-[BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+[BenchmarkDotNet.Attributes.SimpleJob]
 public class math : Bench.BenchTest
 {
     [Bench.CommandLineParameter]

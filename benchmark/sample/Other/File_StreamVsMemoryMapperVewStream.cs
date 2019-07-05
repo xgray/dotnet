@@ -30,7 +30,7 @@ namespace BenchmarkDotNet.Samples.Other
 
         private string fileName;
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             // Recreate file each time for the purpose of minimizing OS IO caching.
@@ -78,7 +78,7 @@ namespace BenchmarkDotNet.Samples.Other
             }
         }
 
-        [Cleanup]
+        [GlobalCleanup]
         public void Cleanup()
         {
             File.Delete(fileName);

@@ -18,7 +18,7 @@ namespace protonet
   using ProtoBuf;
 
   [CommandModule(ShortName = "protonet")]
-  [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+  [BenchmarkDotNet.Attributes.SimpleJob]
   public class ProtoNetBench : SerializeTest
   {
     [CommandLineParameter]
@@ -32,7 +32,7 @@ namespace protonet
 
     private MemoryStream stream;
 
-    [BenchmarkDotNet.Attributes.Setup]
+    [BenchmarkDotNet.Attributes.GlobalSetup]
     public override void Setup()
     {
       simpleInput = new Simple();

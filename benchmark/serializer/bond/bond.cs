@@ -20,7 +20,7 @@ namespace bond
     using Bond.IO.Safe;
 
     [CommandModule(ShortName = "bond")]
-    [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+    [BenchmarkDotNet.Attributes.SimpleJob]
     public class BondBench : SerializeTest
     {
         [CommandLineParameter]
@@ -34,7 +34,7 @@ namespace bond
 
         private byte[] buffer;
 
-        [BenchmarkDotNet.Attributes.Setup]
+        [BenchmarkDotNet.Attributes.GlobalSetup]
         public override void Setup()
         {
             simpleInput = new Simple();

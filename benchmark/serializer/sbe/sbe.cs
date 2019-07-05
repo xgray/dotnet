@@ -19,7 +19,7 @@ namespace sbe
   using Bench;
 
   [CommandModule(ShortName = "sbe")]
-  [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+  [BenchmarkDotNet.Attributes.SimpleJob]
   public class SbeBench : SerializeTest
   {
 
@@ -36,7 +36,7 @@ namespace sbe
     private Complex complexInput;
     private Complex complexOutput;
 
-    [BenchmarkDotNet.Attributes.Setup]
+    [BenchmarkDotNet.Attributes.GlobalSetup]
     public override void Setup()
     {
       buffer = new DirectBuffer(new byte[1024]);

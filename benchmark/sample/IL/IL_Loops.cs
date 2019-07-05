@@ -9,7 +9,7 @@ namespace BenchmarkDotNet.Samples.IL
         private int[] initialValuesArray;
         private List<int> initialValuesList;
 
-        [Setup]
+        [GlobalSetup]
         public void SetupData()
         {
             int MaxCounter = 1000;

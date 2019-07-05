@@ -23,7 +23,7 @@ namespace thriftnet
   using Thrift.Net;
 
   [CommandModule(ShortName = "thriftnet")]
-  [BenchmarkDotNet.Attributes.Jobs.SimpleJob]
+  [BenchmarkDotNet.Attributes.SimpleJob]
   public class ThriftNetBench : SerializeTest
   {
     [CommandLineParameter]
@@ -47,7 +47,7 @@ namespace thriftnet
     TByteBuffer trans;
     TProtocol prot;
 
-    [BenchmarkDotNet.Attributes.Setup]
+    [BenchmarkDotNet.Attributes.GlobalSetup]
     public override void Setup()
     {
       simpleInput = new Simple();

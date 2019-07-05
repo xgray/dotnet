@@ -9,6 +9,7 @@ namespace Bench
     using System.Runtime.InteropServices;
     using System.Runtime.Serialization;
     using System.Security;
+    using System.Threading;
     using System.Xml;
 
     public static partial class ExceptionUtils
