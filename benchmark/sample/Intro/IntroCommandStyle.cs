@@ -3,7 +3,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace BenchmarkDotNet.Samples.Intro
 {
-    [Config("jobs=Dry columns=StdDev")]
+    [DryJob, StdDevColumn]
     public class IntroCommandStyle
     {
         [Benchmark]

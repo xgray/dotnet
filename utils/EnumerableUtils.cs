@@ -13,10 +13,10 @@ namespace Bench
     /// <typeparam name="T">item type</typeparam>
     /// <param name="array">input array</param>
     /// <returns>output HashSet</returns>
-    public static HashSet<T> ToHashSet<T>(this IEnumerable<T> array)
-    {
-      return new HashSet<T>(array ?? Enumerable.Empty<T>());
-    }
+    //public static HashSet<T> ToHashSet<T>(this IEnumerable<T> array)
+    //{
+    //  return new HashSet<T>(array ?? Enumerable.Empty<T>());
+    //}
 
     /// <summary>
     /// convert an IEnumerable to a dictionary of bools.

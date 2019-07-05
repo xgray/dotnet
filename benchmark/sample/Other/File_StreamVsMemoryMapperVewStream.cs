@@ -20,7 +20,7 @@ namespace BenchmarkDotNet.Samples.Other
             {
                 Add(new Job
                 {
-                    Run = { LaunchCount = 2, TargetCount = 10 }
+                    Run = { LaunchCount = 2, IterationCount = 10 }
                 });
             }
         }
