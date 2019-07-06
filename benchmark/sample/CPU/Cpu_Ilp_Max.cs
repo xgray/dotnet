@@ -12,7 +12,7 @@ namespace BenchmarkDotNet.Samples.CPU
         {
             public Config()
             {
-                Add(new Job(Job.LegacyJitX86) { Run = { TargetCount = 20} });
+                Add(new Job(Job.LegacyJitX86) { Run = { IterationCount = 20} });
             }
         }
 

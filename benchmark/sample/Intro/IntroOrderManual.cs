@@ -6,7 +6,7 @@ namespace BenchmarkDotNet.Samples.Intro
 {
     [Orderer(SummaryOrderPolicy.FastestToSlowest, MethodOrderPolicy.Declared)]
     [DryJob]
-    public class IntroOrderAttr
+    public class IntroOrderManual
     {
         [Params(1, 2, 3)]
         public int X { get; set; }

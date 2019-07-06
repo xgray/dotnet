@@ -4,7 +4,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace BenchmarkDotNet.Samples.Intro
 {
-    [MediumRunJob, SkewnessColumn, KurtosisColumn, WelchTTestPValueColumn]
+    [MediumRunJob, SkewnessColumn, KurtosisColumn, StatisticalTestColumn]
     public class IntroAdvancedStats
     {
         #region Initialize
